@@ -5,19 +5,23 @@ const csv = require('csv-parser');
 const fs = require('fs');
 var shuffle = require('shuffle-array');
 const http = require('http');
+const express = require('express')
+const app = express()
 
 const options = {
   options: {
     debug: true,
   },
   identity: {
-    username: 'grvcekim',
-    password: 'oauth:am6u2pot7mgiiuhzuhno34nl6uhrby',
+    username: 'rabeya74',
+    password: 'oauth:e3gqotcj8g17xmqk6zngxuvhb2nv2x',
+    // username: 'grvcekim',
+    // password: 'oauth:am6u2pot7mgiiuhzuhno34nl6uhrby',
   },
-  channels: ['dujsnd'],
+  channels: ['rabeya74'],
 };
 
-const channel = 'dujsnd';
+const channel = 'rabeya74';
 const file = 'trivia.csv';
 var curr = 0;
 var questionSet = [];
