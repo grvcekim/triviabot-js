@@ -5,8 +5,24 @@ const csv = require('csv-parser');
 const fs = require('fs');
 var shuffle = require('shuffle-array');
 const http = require('http');
-const express = require('express')
-const app = express()
+var express = require('express');
+var handlebars = require('express-handlebars')
+  .create({defaultLayout: 'main'});
+var app = express();
+
+app.engine('handlebars', handlebars.engine)
+app.set('view engine', 'handlebars');
+app.use(express.static(__dirname + '/'))
+app.get('/', function(req, res, next){
+  res.render('index', {
+    layout: 'main',
+    Questions: question,
+  })
+})
+
+app.listen(8080);
+
+
 
 const options = {
   options: {
@@ -35,7 +51,7 @@ loadQuestions(file);
 
 client.on('connected', onConnectedHandler);
 client.on('chat', onChatHandler);
-createWebsite();
+// createHTML();
 
 function onConnectedHandler(address, port) {
   client.action(channel, 'bot has connected');
@@ -81,4 +97,23 @@ function createWebsite() {
     res.end(`${question}`);
     // res.end('Hello World!');
   }).listen(8080);
+}
+function createHTML(){
+  http.createServer(function(req, res){
+    res.writeHead(200, {'Content-Type': 'text/html'});
+    var myReadStream = fs.createReadStream(__dirname + '/index.html', 'utf8');
+    myReadStream.pipe(res);
+  }).listen(8080);
+}
+function renderWebsite(){
+  app.engine('handlebars', handlebars.engine)
+  app.set('view engine', 'handlebars');
+  app.use(express.static(__dirname + '/'))
+  app.get('/', function(req, res, next){
+  res.render('index', {
+    layout: 'main'
+  })
+})
+
+  app.listen(8080);
 }
