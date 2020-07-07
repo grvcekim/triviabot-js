@@ -1,7 +1,8 @@
 // username must be named a mod in the channel -> /mod <username> in channel's chat
 
 const tmi = require('tmi.js');
-const csv = require('csv-parser');
+const createCsvParser = require('csv-parser');
+const createCsvWriter = require('csv-writer').createObjectCsvWriter;
 const fs = require('fs');
 var shuffle = require('shuffle-array');
 const http = require('http');
@@ -9,19 +10,6 @@ var express = require('express');
 var handlebars = require('express-handlebars')
   .create({defaultLayout: 'main'});
 var app = express();
-
-app.engine('handlebars', handlebars.engine)
-app.set('view engine', 'handlebars');
-app.use(express.static(__dirname + '/'))
-app.get('/', function(req, res, next){
-  res.render('index', {
-    layout: 'main',
-    Questions: question,
-  })
-})
-
-app.listen(8080);
-
 
 
 const options = {
@@ -41,8 +29,9 @@ const channel = 'rabeya74';
 const file = 'trivia.csv';
 var curr = 0;
 var questionSet = [];
-var question = '';
+var question = 'foo';
 var answer = '';
+var localLeaderboard = [];
 
 const client = new tmi.client(options);
 
@@ -51,7 +40,7 @@ loadQuestions(file);
 
 client.on('connected', onConnectedHandler);
 client.on('chat', onChatHandler);
-// createHTML();
+renderWebsite();
 
 function onConnectedHandler(address, port) {
   client.action(channel, 'bot has connected');
@@ -60,16 +49,12 @@ function onConnectedHandler(address, port) {
 
 function onChatHandler(channel, user, message, self) {
   if (self) { return };
-  if (message.toLowerCase() === answer.toLowerCase()) {
-    var name = user["display-name"] || user["username"];
-    client.action(channel, `${name} guessed the correct answer: ${answer}`);
-    askQuestion();
-  }
+  checkAnswer(user, message);
 };
 
 function loadQuestions(file) {
 	fs.createReadStream(file)
-  .pipe(csv())
+  .pipe(createCsvParser())
   .on('data', (row) => {
 		console.log(row);
 		questionSet.push(row) //appends row to questionSet array
@@ -78,6 +63,19 @@ function loadQuestions(file) {
 		console.log('CSV file successfully processed');
   });
   shuffle(questionSet);
+}
+
+function checkAnswer(user, message) {
+  if (message.toLowerCase() === answer.toLowerCase()) {
+    var name = user["display-name"] || user["username"];
+    client.action(channel, `${name} guessed the correct answer: ${answer}`);
+    askQuestion();
+    localLeaderboard.push(
+      {
+        
+      }
+    )
+  }
 }
 
 function askQuestion() {
@@ -95,9 +93,9 @@ function createWebsite() {
   http.createServer(function (req, res) {
     res.writeHead(200, {'Content-Type': 'text/plain'});
     res.end(`${question}`);
-    // res.end('Hello World!');
   }).listen(8080);
 }
+
 function createHTML(){
   http.createServer(function(req, res){
     res.writeHead(200, {'Content-Type': 'text/html'});
@@ -105,15 +103,16 @@ function createHTML(){
     myReadStream.pipe(res);
   }).listen(8080);
 }
+
 function renderWebsite(){
   app.engine('handlebars', handlebars.engine)
   app.set('view engine', 'handlebars');
   app.use(express.static(__dirname + '/'))
   app.get('/', function(req, res, next){
   res.render('index', {
-    layout: 'main'
+    layout: 'main',
+    Questions: question,
   })
 })
-
-  app.listen(8080);
+app.listen(8080);
 }
