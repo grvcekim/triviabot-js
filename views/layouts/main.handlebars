@@ -10,10 +10,21 @@
 
             }
         </style> -->
+        <script>
+            setTimeout(function(){
+                 // location.reload();
+                 $.get("/api", function(data){
+                     somestuff;
+                     $(#questions).text(data.question)
+
+                 }); 
+            }, 1000);
+            
+        </script>
         
     </head>
     <body>
-        <h1>Question</h1>
+        <h1>Question <p class="question">{{Questions}}</p></h1>
         <h3> ...The question</h3><br>
         <h2>Leader Board</h2>
 

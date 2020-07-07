@@ -32,6 +32,13 @@ var questionSet = [];
 var question = 'foo';
 var answer = '';
 var localLeaderboard = [];
+const csvWriter = createCsvWriter({
+  path: 'out.csv',
+  header: [
+    {id: 'name', title: 'Name'},
+    {id: 'score', title: 'Score'}
+  ]
+});
 
 const client = new tmi.client(options);
 
@@ -70,12 +77,34 @@ function checkAnswer(user, message) {
     var name = user["display-name"] || user["username"];
     client.action(channel, `${name} guessed the correct answer: ${answer}`);
     askQuestion();
-    localLeaderboard.push(
-      {
-        
-      }
-    )
+    addToLeaderboard(name);
   }
+}
+
+function clearLeaderboard() {
+  fs.writeFile('out.csv', '', function(){console.log('done')})
+}
+
+function addToLeaderboard(name) {
+  clearLeaderboard();
+  var i;
+  for (i = 0; i < localLeaderboard.length; i++) {
+    var curr = localLeaderboard[i];
+    if (curr.name === name) {
+      curr.score = curr.score + 1;
+      csvWriter
+        .writeRecords(localLeaderboard)
+        .then(()=> console.log('The CSV file was written successfully'));
+      return;
+    }
+  }
+  var newEntry = {name: '', score: 0};
+  newEntry.name = name;
+  newEntry.score = 1;
+  localLeaderboard.push(newEntry);
+  csvWriter
+    .writeRecords(localLeaderboard)
+    .then(()=> console.log('The CSV file was written successfully'));
 }
 
 function askQuestion() {
