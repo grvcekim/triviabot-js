@@ -1,31 +1,26 @@
 // username must be named a mod in the channel -> /mod <username> in channel's chat
-
+require('dotenv').config();
 const tmi = require('tmi.js');
 const createCsvParser = require('csv-parser');
 const createCsvWriter = require('csv-writer').createObjectCsvWriter;
 const fs = require('fs');
-var shuffle = require('shuffle-array');
 const http = require('http');
 var express = require('express');
-var handlebars = require('express-handlebars')
-  .create({defaultLayout: 'main'});
+var handlebars = require('express-handlebars').create({defaultLayout: 'main'});
 var app = express();
-
 
 const options = {
   options: {
     debug: true,
   },
   identity: {
-    username: 'rabeya74',
-    password: 'oauth:e3gqotcj8g17xmqk6zngxuvhb2nv2x',
-    // username: 'grvcekim',
-    // password: 'oauth:am6u2pot7mgiiuhzuhno34nl6uhrby',
+    username: process.env.USERNAME,
+    password: process.env.OAUTH,
   },
-  channels: ['rabeya74'],
+  channels: [process.env.CHANNEL],
 };
 
-const channel = 'rabeya74';
+const channel = process.env.CHANNEL;
 const file = 'trivia.csv';
 var curr = 0;
 var questionSet = [];
@@ -69,7 +64,6 @@ function loadQuestions(file) {
   .on('end', () => {
 		console.log('CSV file successfully processed');
   });
-  shuffle(questionSet);
 }
 
 function checkAnswer(user, message) {
@@ -125,7 +119,7 @@ function createWebsite() {
   }).listen(8080);
 }
 
-function createHTML(){
+function createHTML() {
   http.createServer(function(req, res){
     res.writeHead(200, {'Content-Type': 'text/html'});
     var myReadStream = fs.createReadStream(__dirname + '/index.html', 'utf8');
@@ -133,15 +127,15 @@ function createHTML(){
   }).listen(8080);
 }
 
-function renderWebsite(){
+function renderWebsite() {
   app.engine('handlebars', handlebars.engine)
   app.set('view engine', 'handlebars');
-  app.use(express.static(__dirname + '/'))
-  app.get('/', function(req, res, next){
-  res.render('index', {
-    layout: 'main',
-    Questions: question,
-  })
-})
+  app.use(express.static(__dirname + '/'));
+  app.get('/', function(req, res, next) {
+    res.render('index', {
+      layout: 'main',
+      Questions: question,
+    });
+  });
 app.listen(8080);
 }
