@@ -1,32 +1,36 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        title = title
-        <meta charset = "utf-8">
-        <title>IBM Twitch Bot</title>
-        <!-- <style>
+
+<head>
+    title = title
+    <meta charset="utf-8">
+    <title>IBM Twitch Bot</title>
+    <!-- <style>
             IBM RGB : 75 107 175 
             h2{
 
             }
         </style> -->
-        <script>
-            setTimeout(function(){
-                 // location.reload();
-                 $.get("/api", function(data){
-                     somestuff;
-                     $(#questions).text(data.question)
+    <script>
+        setTimeout(function () {
+            // location.reload();
+            $.get("/api", function (data) {
+                somestuff;
+                $(#questions).text(data.question)
 
-                 }); 
-            }, 1000);
-            
-        </script>
-        
-    </head>
-    <body>
-        <h1>Question <p class="question">{{Questions}}</p></h1>
-        <h3> ...The question</h3><br>
-        <h2>Leader Board</h2>
+            });
+        }, 1000);
 
-    </body>
+    </script>
+
+</head>
+
+<body>
+    <h1>Question <p class="question">{{Questions}}</p>
+    </h1>
+    <h3> ...The question</h3><br>
+    <h2>Leader Board</h2>
+
+</body>
+
 </html>

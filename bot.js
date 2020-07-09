@@ -1,12 +1,15 @@
 // username must be named a mod in the channel -> /mod <username> in channel's chat
-require('dotenv').config();
-const tmi = require('tmi.js');
-const createCsvParser = require('csv-parser');
-const createCsvWriter = require('csv-writer').createObjectCsvWriter;
-const fs = require('fs');
-const http = require('http');
-var express = require('express');
-var handlebars = require('express-handlebars').create({defaultLayout: 'main'});
+require("dotenv").config();
+const tmi = require("tmi.js");
+const createCsvParser = require("csv-parser");
+const createCsvWriter = require("csv-writer").createObjectCsvWriter;
+const fs = require("fs");
+url = require("url");
+const http = require("http");
+var express = require("express");
+var handlebars = require("express-handlebars").create({
+  defaultLayout: "main",
+});
 var app = express();
 
 const options = {
@@ -21,18 +24,18 @@ const options = {
 };
 
 const channel = process.env.CHANNEL;
-const file = 'trivia.csv';
+const file = "trivia.csv";
 var curr = 0;
 var questionSet = [];
-var question = 'foo';
-var answer = '';
+var question = "foo";
+var answer = "";
 var localLeaderboard = [];
 const csvWriter = createCsvWriter({
-  path: 'out.csv',
+  path: "out.csv",
   header: [
-    {id: 'name', title: 'Name'},
-    {id: 'score', title: 'Score'}
-  ]
+    { id: "name", title: "Name" },
+    { id: "score", title: "Score" },
+  ],
 });
 
 const client = new tmi.client(options);
@@ -40,30 +43,32 @@ const client = new tmi.client(options);
 client.connect();
 loadQuestions(file);
 
-client.on('connected', onConnectedHandler);
-client.on('chat', onChatHandler);
+client.on("connected", onConnectedHandler);
+client.on("chat", onChatHandler);
 renderWebsite();
 
 function onConnectedHandler(address, port) {
-  client.action(channel, 'bot has connected');
+  client.action(channel, "bot has connected");
   askQuestion();
-};
+}
 
 function onChatHandler(channel, user, message, self) {
-  if (self) { return };
+  if (self) {
+    return;
+  }
   checkAnswer(user, message);
-};
+}
 
 function loadQuestions(file) {
-	fs.createReadStream(file)
-  .pipe(createCsvParser())
-  .on('data', (row) => {
-		console.log(row);
-		questionSet.push(row) //appends row to questionSet array
-  })
-  .on('end', () => {
-		console.log('CSV file successfully processed');
-  });
+  fs.createReadStream(file)
+    .pipe(createCsvParser())
+    .on("data", (row) => {
+      console.log(row);
+      questionSet.push(row); //appends row to questionSet array
+    })
+    .on("end", () => {
+      console.log("CSV file successfully processed");
+    });
 }
 
 function checkAnswer(user, message) {
@@ -76,7 +81,9 @@ function checkAnswer(user, message) {
 }
 
 function clearLeaderboard() {
-  fs.writeFile('out.csv', '', function(){console.log('done')})
+  fs.writeFile("out.csv", "", function () {
+    console.log("done");
+  });
 }
 
 function addToLeaderboard(name) {
@@ -88,54 +95,85 @@ function addToLeaderboard(name) {
       curr.score = curr.score + 1;
       csvWriter
         .writeRecords(localLeaderboard)
-        .then(()=> console.log('The CSV file was written successfully'));
+        .then(() => console.log("The CSV file was written successfully"));
       return;
     }
   }
-  var newEntry = {name: '', score: 0};
+  var newEntry = { name: "", score: 0 };
   newEntry.name = name;
   newEntry.score = 1;
   localLeaderboard.push(newEntry);
   csvWriter
     .writeRecords(localLeaderboard)
-    .then(()=> console.log('The CSV file was written successfully'));
+    .then(() => console.log("The CSV file was written successfully"));
 }
 
 function askQuestion() {
   if (curr === questionSet.length) {
-    client.action(channel, 'Those are all questions, thanks for playing!');
+    client.action(channel, "Those are all questions, thanks for playing!");
     return;
   }
   question = questionSet[curr].question;
   answer = questionSet[curr].answer;
   curr = curr + 1;
-  client.action(channel, `Question #${curr} of ${questionSet.length}: ${question}`);
+  client.action(
+    channel,
+    `Question #${curr} of ${questionSet.length}: ${question}`
+  );
 }
 
 function createWebsite() {
-  http.createServer(function (req, res) {
-    res.writeHead(200, {'Content-Type': 'text/plain'});
-    res.end(`${question}`);
-  }).listen(8080);
+  http
+    .createServer(function (req, res) {
+      res.writeHead(200, { "Content-Type": "text/plain" });
+      res.end(`${question}`);
+    })
+    .listen(8080);
 }
 
 function createHTML() {
-  http.createServer(function(req, res){
-    res.writeHead(200, {'Content-Type': 'text/html'});
-    var myReadStream = fs.createReadStream(__dirname + '/index.html', 'utf8');
-    myReadStream.pipe(res);
-  }).listen(8080);
+  http
+    .createServer(function (req, res) {
+      res.writeHead(200, { "Content-Type": "text/html" });
+      var myReadStream = fs.createReadStream(__dirname + "/index.html", "utf8");
+      myReadStream.pipe(res);
+    })
+    .listen(8080);
 }
 
 function renderWebsite() {
-  app.engine('handlebars', handlebars.engine)
-  app.set('view engine', 'handlebars');
-  app.use(express.static(__dirname + '/'));
-  app.get('/', function(req, res, next) {
-    res.render('index', {
-      layout: 'main',
+  app.engine("handlebars", handlebars.engine);
+  app.set("view engine", "handlebars");
+  app.use(express.static(__dirname + "/"));
+  app.get("/", function (req, res, next) {
+    res.render("index", {
+      layout: "main",
       Questions: question,
     });
   });
-app.listen(8080);
+  app.listen(8080);
 }
+
+// -------------------------
+
+//question
+function newQuestion() {
+  guessCnt = 0;
+  guess = "";
+  createWebsite();
+  askQuestion();
+  createHTML();
+  renderWebsite();
+}
+
+function server() {
+  xmlhttp = new XMLHttpRequest();
+  xmlhttp.open("GET", "http://localhost:8000/getstring", true);
+  xmlhttp.onreadystatechange = function () {
+    if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+      string = xmlhttp.responseText;
+    }
+  };
+  xmlhttp.send();
+}
+//https://stackoverflow.com/questions/6011984/basic-ajax-send-receive-with-node-js
