@@ -1,28 +1,18 @@
-const createCsvWriter = require('csv-writer').createObjectCsvWriter;
-const csvWriter = createCsvWriter({
-  path: 'out.csv',
-  header: [
-    {id: 'name', title: 'Name'},
-    {id: 'surname', title: 'Surname'},
-    {id: 'age', title: 'Age'},
-    {id: 'gender', title: 'Gender'},
-  ]
+require('dotenv').config();
+const mysql = require('mysql');
+
+var connection = mysql.createConnection({
+  host     : process.env.HOST,
+  user     : process.env.DB_USER,
+  password : process.env.DB_PASS,
+  database : 'triviabot'
 });
 
-const data = [
-  {
-    name: 'Clair',
-    surname: 'White',
-    age: 33,
-    gender: 'F',
-  }, {
-    name: 'Fancy',
-    surname: 'Brown',
-    age: 78,
-    gender: 'F'
+connection.connect(function(err) {
+  if (err) {
+    return console.error('error: ' + err.message);
   }
-];
+  console.log('Connected to the MySQL server.');
+});
 
-csvWriter
-  .writeRecords(data)
-  .then(()=> console.log('The CSV file was written successfully'));
+connection.end();

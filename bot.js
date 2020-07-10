@@ -3,19 +3,21 @@ require('dotenv').config();
 const tmi = require('tmi.js');
 const createCsvParser = require('csv-parser');
 const createCsvWriter = require('csv-writer').createObjectCsvWriter;
+const mysql = require('mysql');
 const fs = require('fs');
 const http = require('http');
 var express = require('express');
 var handlebars = require('express-handlebars').create({defaultLayout: 'main'});
 var app = express();
 
+// Twitch connection config
 const options = {
   options: {
     debug: true,
   },
   identity: {
-    username: process.env.USERNAME,
-    password: process.env.OAUTH,
+    username: process.env.TWITCH_USER,
+    password: process.env.TWITCH_PASS,
   },
   channels: [process.env.CHANNEL],
 };
@@ -112,20 +114,20 @@ function askQuestion() {
   client.action(channel, `Question #${curr} of ${questionSet.length}: ${question}`);
 }
 
-function createWebsite() {
-  http.createServer(function (req, res) {
-    res.writeHead(200, {'Content-Type': 'text/plain'});
-    res.end(`${question}`);
-  }).listen(8080);
-}
+// function createWebsite() {
+//   http.createServer(function (req, res) {
+//     res.writeHead(200, {'Content-Type': 'text/plain'});
+//     res.end(`${question}`);
+//   }).listen(8080);
+// }
 
-function createHTML() {
-  http.createServer(function(req, res){
-    res.writeHead(200, {'Content-Type': 'text/html'});
-    var myReadStream = fs.createReadStream(__dirname + '/index.html', 'utf8');
-    myReadStream.pipe(res);
-  }).listen(8080);
-}
+// function createHTML() {
+//   http.createServer(function(req, res){
+//     res.writeHead(200, {'Content-Type': 'text/html'});
+//     var myReadStream = fs.createReadStream(__dirname + '/index.html', 'utf8');
+//     myReadStream.pipe(res);
+//   }).listen(8080);
+// }
 
 function renderWebsite() {
   app.engine('handlebars', handlebars.engine)
@@ -134,7 +136,7 @@ function renderWebsite() {
   app.get('/', function(req, res, next) {
     res.render('index', {
       layout: 'main',
-      Questions: question,
+      question: question,
     });
   });
 app.listen(8080);
