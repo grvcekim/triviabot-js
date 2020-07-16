@@ -1,0 +1,8 @@
+TWITCH_USER='rabeya74'
+TWITCH_PASS='oauth:eyz6kceqkmdjqksxt16ulazgr773vc'
+CHANNEL='rabeya74'
+
+HOST='localhost'
+DB_USER='root'
+DB_PASS='password'
+

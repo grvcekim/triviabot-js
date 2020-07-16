@@ -5,10 +5,11 @@ const createCsvParser = require('csv-parser');
 const createCsvWriter = require('csv-writer').createObjectCsvWriter;
 const mysql = require('mysql');
 const fs = require('fs');
-const http = require('http');
 var express = require('express');
-var handlebars = require('express-handlebars').create({defaultLayout: 'main'});
+var handlebars = require('express-handlebars').create({ defaultLayout: 'main' });
 var app = express();
+const http = require('http').createServer(app);
+var io = require('socket.io')(http);
 
 // Twitch connection config
 const options = {
@@ -140,13 +141,24 @@ function renderWebsite() {
   app.engine('handlebars', handlebars.engine)
   app.set('view engine', 'handlebars');
   app.use(express.static(__dirname + '/'));
-  app.get('/', function(req, res, next) {
+  app.get('/', function (req, res, next) {
     res.render('index', {
       layout: 'main',
       question: question,
     });
   });
   app.listen(8080);
+  io.on('connection', function (socket) { // Notify for a new connection and pass the socket as parameter.
+    console.log('new connection');
+
+    var incremental = 0;
+    setInterval(function () {
+      console.log('emit new value', question);
+
+      socket.emit('update-value', question); // Emit on the opened socket.
+    }, 1000);
+
+  });
 }
 
 // -------------------------

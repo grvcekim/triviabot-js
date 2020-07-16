@@ -11,23 +11,30 @@
 
             }
         </style> -->
-        <script>
-            setTimeout(function(){
-                 // location.reload();
-                 $.get("/api", function(data){
-                     somestuff;
-                     $(#questions).text(data.question)
+    <pre id="question"></pre>
 
-                 }); 
-            }, 1000);
-            
-        </script>
-        
-    </head>
-    <body>
-        <h1>Question <p class="question">{{question}}</p></h1>
-        <h3> ...The question</h3><br>
-        <h2>Leader Board</h2>
+    <script src="/socket.io.js"></script>
 
-    </body>
+    <script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
+    <script>
+        var socket = io(); // Connect the socket on the port defined before.
+
+        socket.on('update-value', function (value) { // When a 'update-value' event is received, execute the following code.
+            console.log('received new value', value);
+
+            $('#question').html(value);
+        });
+    </script>
+
+</head>
+
+<body>
+    <h1>Question <p class="question">{{question}}</p>
+    </h1>
+    <h3> ...The question</h3><br>
+    <h2>Leader Board</h2>
+
+
+</body>
+
 </html>
