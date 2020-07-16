@@ -13,7 +13,7 @@
         </style> -->
     <pre id="question"></pre>
 
-    <script src="/socket.io.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
 
     <script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
     <script>
@@ -22,7 +22,7 @@
         socket.on('update-value', function (value) { // When a 'update-value' event is received, execute the following code.
             console.log('received new value', value);
 
-            $('#question').html(value);
+            $('.question').html(value);
         });
     </script>
 
