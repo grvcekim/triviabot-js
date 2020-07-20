@@ -2,13 +2,14 @@
 require('dotenv').config();
 const tmi = require('tmi.js');
 const createCsvParser = require('csv-parser');
-const createCsvWriter = require('csv-writer').createObjectCsvWriter;
 const mysql = require('mysql');
 const fs = require('fs');
 const http = require('http');
 var express = require('express');
 var handlebars = require('express-handlebars').create({defaultLayout: 'main'});
+var md5 = require("md5");
 var app = express();
+var io = require('socket.io')(8000);
 
 // Twitch connection config
 const options = {
@@ -22,19 +23,25 @@ const options = {
   channels: [process.env.CHANNEL],
 };
 
+var connection = mysql.createConnection({
+  host     : process.env.HOST,
+  user     : process.env.DB_USER,
+  password : process.env.DB_PASS,
+  database : 'triviabot'
+});
+
 const channel = process.env.CHANNEL;
 const file = "trivia.csv";
 var curr = 0;
 var questionSet = [];
 var question = "foo";
 var answer = "";
-var localLeaderboard = [];
-const csvWriter = createCsvWriter({
-  path: "out.csv",
-  header: [
-    { id: "name", title: "Name" },
-    { id: "score", title: "Score" },
-  ],
+
+connection.connect(function(err) {
+  if (err) {
+    return console.error('error: ' + err.message);
+  }
+  console.log('Connected to the MySQL server.');
 });
 
 const client = new tmi.client(options);
@@ -44,7 +51,7 @@ loadQuestions(file);
 
 client.on("connected", onConnectedHandler);
 client.on("chat", onChatHandler);
-renderWebsite();
+renderWebsiteSOCKET();
 
 function onConnectedHandler(address, port) {
   client.action(channel, "bot has connected");
@@ -68,6 +75,19 @@ function loadQuestions(file) {
     .on("end", () => {
       console.log("CSV file successfully processed");
     });
+    var i;
+    for (i = 0; i < questionSet.length; i++) {
+      var q = questionSet[i]["question"];
+      var a = questionSet[i]["answer"];
+      var sql = `INSERT INTO questions(qid, question, answer)
+                VALUES(${i}, ${q}, ${a})`;
+      connection.query(sql, function(err) {
+        if (err) {
+          return console.error('error: ' + err.message);
+        }
+    });
+    connection.end();
+    console.log("Question loaded into database")
 }
 
 function checkAnswer(user, message) {
@@ -75,36 +95,7 @@ function checkAnswer(user, message) {
     var name = user["display-name"] || user["username"];
     client.action(channel, `${name} guessed the correct answer: ${answer}`);
     askQuestion();
-    addToLeaderboard(name);
   }
-}
-
-function clearLeaderboard() {
-  fs.writeFile("out.csv", "", function () {
-    console.log("done");
-  });
-}
-
-function addToLeaderboard(name) {
-  clearLeaderboard();
-  var i;
-  for (i = 0; i < localLeaderboard.length; i++) {
-    var curr = localLeaderboard[i];
-    if (curr.name === name) {
-      curr.score = curr.score + 1;
-      csvWriter
-        .writeRecords(localLeaderboard)
-        .then(() => console.log("The CSV file was written successfully"));
-      return;
-    }
-  }
-  var newEntry = { name: "", score: 0 };
-  newEntry.name = name;
-  newEntry.score = 1;
-  localLeaderboard.push(newEntry);
-  csvWriter
-    .writeRecords(localLeaderboard)
-    .then(() => console.log("The CSV file was written successfully"));
 }
 
 function askQuestion() {
@@ -115,10 +106,7 @@ function askQuestion() {
   question = questionSet[curr].question;
   answer = questionSet[curr].answer;
   curr = curr + 1;
-  client.action(
-    channel,
-    `Question #${curr} of ${questionSet.length}: ${question}`
-  );
+  client.action(channel, `Question #${curr} of ${questionSet.length}: ${question}`);
 }
 
 // function createWebsite() {
@@ -137,7 +125,7 @@ function askQuestion() {
 // }
 
 function renderWebsite() {
-  app.engine('handlebars', handlebars.engine)
+  app.engine('handlebars', handlebars.engine);
   app.set('view engine', 'handlebars');
   app.use(express.static(__dirname + '/'));
   app.get('/', function(req, res, next) {
@@ -149,26 +137,27 @@ function renderWebsite() {
   app.listen(8080);
 }
 
-// -------------------------
+function renderWebsiteSOCKET() {
+  app.engine('handlebars', handlebars.engine);
+  app.set('view engine', 'handlebars');
+  app.use(express.static(__dirname + '/'));
+  app.get('/', function(req, res, next) {
+    res.render('index', {
+      layout: 'main',
+      question: question,
+    });
+  });
+  app.listen(8080);
+  io.on('connection', function (socket) { // Notify for a new connection and pass the socket as parameter.
+    console.log('new connection');
 
-//question
-function newQuestion() {
-  guessCnt = 0;
-  guess = "";
-  createWebsite();
-  askQuestion();
-  createHTML();
-  renderWebsite();
-}
+    var incremental = 0;
+    setInterval(function () {
+        console.log('emit new value', incremental);
 
-function server() {
-  xmlhttp = new XMLHttpRequest();
-  xmlhttp.open("GET", "http://localhost:8000/getstring", true);
-  xmlhttp.onreadystatechange = function () {
-    if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
-      string = xmlhttp.responseText;
-    }
-  };
-  xmlhttp.send();
+        socket.emit('update-value', incremental); // Emit on the opened socket.
+        incremental++;
+    }, 1000);
+
+});
 }
-//https://stackoverflow.com/questions/6011984/basic-ajax-send-receive-with-node-js
