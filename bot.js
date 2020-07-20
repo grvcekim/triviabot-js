@@ -5,10 +5,9 @@ const createCsvParser = require('csv-parser');
 const createCsvWriter = require('csv-writer').createObjectCsvWriter;
 const mysql = require('mysql');
 const fs = require('fs');
-var express = require('express');
 var handlebars = require('express-handlebars').create({ defaultLayout: 'main' });
-var app = express();
-const http = require('http').createServer(app);
+var app = require('express')();
+var http = require('http').createServer(app);
 var io = require('socket.io')(http);
 
 // Twitch connection config
@@ -122,65 +121,27 @@ function askQuestion() {
   );
 }
 
-// function createWebsite() {
-//   http.createServer(function (req, res) {
-//     res.writeHead(200, {'Content-Type': 'text/plain'});
-//     res.end(`${question}`);
-//   }).listen(8080);
-// }
-
-// function createHTML() {
-//   http.createServer(function(req, res){
-//     res.writeHead(200, {'Content-Type': 'text/html'});
-//     var myReadStream = fs.createReadStream(__dirname + '/index.html', 'utf8');
-//     myReadStream.pipe(res);
-//   }).listen(8080);
-// }
 
 function renderWebsite() {
   app.engine('handlebars', handlebars.engine)
   app.set('view engine', 'handlebars');
-  app.use(express.static(__dirname + '/'));
   app.get('/', function (req, res, next) {
     res.render('index', {
       layout: 'main',
       question: question,
     });
   });
-  app.listen(8080);
-  io.on('connection', function (socket) { // Notify for a new connection and pass the socket as parameter.
-    console.log('new connection');
-
-    var incremental = 0;
-    setInterval(function () {
-      console.log('emit new value', question);
-
-      socket.emit('update-value', question); // Emit on the opened socket.
-    }, 1000);
-
+  http.listen(8080, () => {
+      console.log("listening on port 8080");
+      io.on('connection', function (socket) { // Notify for a new connection and pass the socket as parameter.
+        console.log('new connection');
+      });
   });
 }
+var incremental = 0;
+setInterval(function () {
+  console.log('emit new value', incremental);
+  incremental += 1;
 
-// -------------------------
-
-//question
-function newQuestion() {
-  guessCnt = 0;
-  guess = "";
-  createWebsite();
-  askQuestion();
-  createHTML();
-  renderWebsite();
-}
-
-function server() {
-  xmlhttp = new XMLHttpRequest();
-  xmlhttp.open("GET", "http://localhost:8000/getstring", true);
-  xmlhttp.onreadystatechange = function () {
-    if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
-      string = xmlhttp.responseText;
-    }
-  };
-  xmlhttp.send();
-}
-//https://stackoverflow.com/questions/6011984/basic-ajax-send-receive-with-node-js
+  io.emit('update-value', incremental); // Emit on the opened socket.
+}, 1000);
