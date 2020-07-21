@@ -25,7 +25,8 @@ client.on("connected", onConnectedHandler);
 client.on("chat", onChatHandler);
 
 var total = -1;
-var askedQuestions = [];
+var questionArr = [];
+var askedQuestionIds = [];
 
 const mysql = require('mysql');
 // database connection config
@@ -43,7 +44,8 @@ connection.connect(function(err) {
   }
   console.log('Connected to the MySQL server.');
   initializeDatabase();
-  var questionArr = parseCsv(CSV_FILE);
+  // var questionArr = parseCsv(CSV_FILE);
+  parseCsv(CSV_FILE);
   loadDatabase(questionArr);
 });
 
@@ -86,7 +88,7 @@ function initializeDatabase() {
 }
 
 function parseCsv(CSV_FILE) {
-  var questionArr = [];
+  // var questionArr = [];
   fs.createReadStream(CSV_FILE)
     .pipe(createCsvParser())
     .on("data", (row) => {
@@ -96,7 +98,8 @@ function parseCsv(CSV_FILE) {
     .on("end", () => {
       console.log("CSV file successfully processed.");
     });
-  return questionArr;
+  total = questionArr.length;
+  // return questionArr;
 }
 
 function loadDatabase(questionArr) {
@@ -130,16 +133,15 @@ function onConnectedHandler(address, port) {
 }
 
 function askQuestion() {
-  if (askedQuestions.length === total) {
+  if (askedQuestionIds.length === total) {
     client.action(channel, "Those are all questions, thanks for playing!");
     return;
   }
-  do {
-    var i = Math.floor(Math.random() * total) + 1;
-    console.log(total);
-  }
-  while (i in askedQuestions);
-  askedQuestions.push(i);
+  var i = Math.floor(Math.random() * total) + 1;
+  // while (i in askedQuestionIds) {
+  //   i = Math.floor(Math.random() * total) + 1;
+  // }
+  askedQuestionIds.push(i);
   console.log("i =", i);
   var sql = `SELECT * FROM questions WHERE qid = ${i}`;
   connection.query(sql, function(err, result) {
