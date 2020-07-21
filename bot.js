@@ -131,8 +131,8 @@ function renderWebsite() {
       question: question,
     });
   });
-  http.listen(8080, () => {
-      console.log("listening on port 8080");
+  http.listen(8000, () => {
+      console.log("listening on port 8000");
       io.on('connection', function (socket) { // Notify for a new connection and pass the socket as parameter.
         console.log('new connection');
       });
