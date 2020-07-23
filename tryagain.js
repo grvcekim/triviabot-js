@@ -20,12 +20,11 @@ const options = {
 const channel = process.env.CHANNEL;
 
 const client = new tmi.client(options);
-client.connect();
+// client.connect();
 client.on("connected", onConnectedHandler);
 client.on("chat", onChatHandler);
 
-var total = -1;
-var questionArr = [];
+var total = 0;
 var askedQuestionIds = [];
 
 const mysql = require('mysql');
@@ -43,11 +42,24 @@ connection.connect(function(err) {
     return console.error('*** error: ' + err.message);
   }
   console.log('Connected to the MySQL server.');
-  initializeDatabase();
-  // var questionArr = parseCsv(CSV_FILE);
-  parseCsv(CSV_FILE);
-  loadDatabase(questionArr);
+  init(); // Parses CSV and preps the database
 });
+
+async function init() {
+  var questionArr = parseCsv(CSV_FILE);
+  console.log(questionArr);
+  initializeDatabase();
+  await delay(1000);
+  loadDatabase(questionArr);
+  await delay(1000);
+  client.connect();
+}
+
+function delay(ms){
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
+}
 
 function onConnectedHandler(address, port) {
   client.action(channel, "bot has connected");
@@ -88,7 +100,7 @@ function initializeDatabase() {
 }
 
 function parseCsv(CSV_FILE) {
-  // var questionArr = [];
+  var questionArr = [];
   fs.createReadStream(CSV_FILE)
     .pipe(createCsvParser())
     .on("data", (row) => {
@@ -98,61 +110,84 @@ function parseCsv(CSV_FILE) {
     .on("end", () => {
       console.log("CSV file successfully processed.");
     });
-  total = questionArr.length;
-  // return questionArr;
+  return questionArr;
 }
 
 function loadDatabase(questionArr) {
-  setTimeout(() => {
-    for (let pair of questionArr) {
-      var q = pair.question;
-      var a = pair.answer;
-      var sql = `INSERT INTO questions (question, answer) VALUES ('${q}', '${a}')`;
-      connection.query(sql, function(err) {
-        if (err) {
-          return console.error('*** error: ' + err.message);
-        }
-      });
-    }
-    var sql = `SELECT * FROM questions`;
-    connection.query(sql, function(err, result) {
+  console.log(questionArr);
+  for (let pair of questionArr) {
+    // var pair = questionArr[i];
+    // console.log(questionArr(pair));
+    var q = pair.question;
+    var a = pair.answer;
+    // console.log("q", q);
+    // console.log("a", a)
+    var sql = `INSERT INTO questions (question, answer) VALUES ('${q}', '${a}')`;
+    connection.query(sql, function(err) {
       if (err) {
         return console.error('*** error: ' + err.message);
       }
-      total = result.length;
-      console.log("total", total);
     });
-    // connection.end();
-    console.log("All questions loaded into database.");
-  }, 3000);
-}
-
-function onConnectedHandler(address, port) {
-  client.action(channel, "bot has connected");
-  askQuestion();
-}
-
-function askQuestion() {
-  if (askedQuestionIds.length === total) {
-    client.action(channel, "Those are all questions, thanks for playing!");
-    return;
   }
-  var i = Math.floor(Math.random() * total) + 1;
-  // while (i in askedQuestionIds) {
-  //   i = Math.floor(Math.random() * total) + 1;
-  // }
-  askedQuestionIds.push(i);
-  console.log("i =", i);
-  var sql = `SELECT * FROM questions WHERE qid = ${i}`;
+  var sql = `SELECT * FROM questions`;
   connection.query(sql, function(err, result) {
     if (err) {
       return console.error('*** error: ' + err.message);
     }
-    console.log(result);
+    total = result.length;
+    console.log("total", total);
   });
+  // connection.end();
+  console.log("All questions loaded into database.");
+}
 
-  // question = questionSet[curr].question;
-  // answer = questionSet[curr].answer;
-  // curr = curr + 1;
-  // client.action(channel, `Question #${curr} of ${questionSet.length}: ${question}`);
+function onConnectedHandler(address, port) {
+  client.action(channel, "bot has connected");
+  chooseQuestion();
+}
+
+async function chooseQuestion() {
+  console.log("in askQuestion");
+  if (askedQuestionIds.length === total) {
+    client.action(channel, "Those are all the questions, thanks for playing!");
+    return;
+  }
+  var i = Math.floor(Math.random() * total) + 1;
+  while (i in askedQuestionIds) {
+    i = Math.floor(Math.random() * total) + 1;
+  }
+  console.log("i =", i);
+  askedQuestionIds.push(i);
+  console.log("askedQuestionIds", askedQuestionIds);
+  var sql = `SELECT * FROM questions WHERE qid = ${i}`;
+  var curr;
+  // runloop = async () => {
+  //   connection.query(sql, function(err, result) {
+  //     if (err) {
+  //       return console.error('*** error: ' + err.message);
+  //     }
+  //     console.log("result", result)
+  //     curr = result[0];
+  //     var q = curr.question;
+  //     var a = curr.answer;
+  //     await client.action(channel, `Question #${askedQuestionIds[askedQuestionIds.length - 1]} of ${total}: ${q}`);
+  //   });
+  // }
+  connection.query(sql, function(err, result) {
+    if (err) {
+      return console.error('*** error: ' + err.message);
+    }
+    console.log("result", result)
+    curr = result[0];
+    var q = curr.question;
+    var a = curr.answer;
+    client.action(channel, `Question #${askedQuestionIds[askedQuestionIds.length - 1]} of ${total}: ${q}`);
+  });
+  await console.log("curr", curr);
+}
+
+function askQuestion(curr) {
+  var q = curr.question;
+  var a = curr.answer;
+  // client.action(channel, `Question #${askedQuestionIds[-1]} of ${total}: ${q}`);
 }
