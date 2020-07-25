@@ -1,17 +1,16 @@
-// username must be named a mod in the channel -> /mod <username> in channel's chat
 require('dotenv').config();
-const tmi = require('tmi.js');
 const createCsvParser = require('csv-parser');
-const mysql = require('mysql');
 const fs = require('fs');
-const http = require('http');
-var express = require('express');
-var handlebars = require('express-handlebars').create({defaultLayout: 'main'});
-var md5 = require("md5");
-var app = express();
-var io = require('socket.io')(8000);
+var handlebars = require('express-handlebars').create({ defaultLayout: 'main' });
+var app = require('express')();
+const http = require('http').createServer(app);
+var io = require('socket.io')(http);
 
-// Twitch connection config
+// const SQL_FILE = 'db.sql';
+const CSV_FILE = 'trivia.csv';
+
+const tmi = require('tmi.js');
+// twitch connection config
 const options = {
   options: {
     debug: true,
@@ -22,40 +21,54 @@ const options = {
   },
   channels: [process.env.CHANNEL],
 };
+const channel = process.env.CHANNEL;
 
+const client = new tmi.client(options);
+// client.connect();
+client.on("connected", onConnectedHandler);
+client.on("chat", onChatHandler);
+
+var total = 0;
+var askedQuestionIds = [];
+var question = '';
+var answer = '';
+
+const mysql = require('mysql');
+// database connection config
 var connection = mysql.createConnection({
   host     : process.env.HOST,
   user     : process.env.DB_USER,
   password : process.env.DB_PASS,
-  database : 'triviabot'
+  database : 'triviabot',
+  multipleStatements: true
 });
-
-const channel = process.env.CHANNEL;
-const file = "trivia.csv";
-var curr = 0;
-var questionSet = [];
-var question = "foo";
-var answer = "";
 
 connection.connect(function(err) {
   if (err) {
-    return console.error('error: ' + err.message);
+    return console.error('*** error: ' + err.message);
   }
   console.log('Connected to the MySQL server.');
+  renderWebsite();
+  init(); // parce csv, prep database, connect to twitch
 });
 
-const client = new tmi.client(options);
+async function init() {
+  var questionArr = parseCsv(CSV_FILE);
+  initializeDatabase();
+  await delay(1000);
+  loadDatabase(questionArr);
+  await delay(1000);
+  client.connect();
+}
 
-client.connect();
-loadQuestions(file);
-
-client.on("connected", onConnectedHandler);
-client.on("chat", onChatHandler);
-renderWebsiteSOCKET();
+function delay(ms){
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
+}
 
 function onConnectedHandler(address, port) {
   client.action(channel, "bot has connected");
-  askQuestion();
 }
 
 function onChatHandler(channel, user, message, self) {
@@ -65,99 +78,169 @@ function onChatHandler(channel, user, message, self) {
   checkAnswer(user, message);
 }
 
-function loadQuestions(file) {
-  fs.createReadStream(file)
+function initializeDatabase() {
+  var sql = "DROP DATABASE IF EXISTS `triviabot`; \
+  CREATE DATABASE `triviabot`; \
+  USE `triviabot`; \
+  SET NAMES utf8; \
+  SET character_set_client = utf8mb4; \
+  DROP TABLE IF EXISTS `questions`; \
+  CREATE TABLE `questions` ( \
+    `qid` tinyint(4) NOT NULL AUTO_INCREMENT, \
+    `question` varchar(250) NOT NULL, \
+    `answer` varchar(100) NOT NULL, \
+    PRIMARY KEY (`qid`) \
+  ); \
+  DROP TABLE IF EXISTS `leaderboard`; \
+  CREATE TABLE `leaderboard` ( \
+    `user_hash` varchar(120) NOT NULL, \
+    `score` tinyint(4) NOT NULL, \
+    PRIMARY KEY (`user_hash`) \
+  );";
+  connection.query(sql, function(err) {
+    if (err) {
+      return console.error('*** error: ' + err.message);
+    }
+  });
+  console.log("Database initialized.");
+}
+
+function parseCsv(CSV_FILE) {
+  var questionArr = [];
+  fs.createReadStream(CSV_FILE)
     .pipe(createCsvParser())
     .on("data", (row) => {
       console.log(row);
-      questionSet.push(row); //appends row to questionSet array
+      questionArr.push(row); // appends row to questionArr array
     })
     .on("end", () => {
-      console.log("CSV file successfully processed");
+      console.log("CSV file successfully processed.");
     });
-    var i;
-    for (i = 0; i < questionSet.length; i++) {
-      var q = questionSet[i]["question"];
-      var a = questionSet[i]["answer"];
-      var sql = `INSERT INTO questions(qid, question, answer)
-                VALUES(${i}, ${q}, ${a})`;
-      connection.query(sql, function(err) {
-        if (err) {
-          return console.error('error: ' + err.message);
-        }
+  return questionArr;
+}
+
+function loadDatabase(questionArr) {
+  console.log(questionArr);
+  for (let pair of questionArr) {
+    var q = pair.question;
+    var a = pair.answer;
+    var sql = `INSERT INTO questions (question, answer) VALUES ('${q}', '${a}')`;
+    connection.query(sql, function(err) {
+      if (err) {
+        return console.error('*** error: ' + err.message);
+      }
     });
-    connection.end();
-    console.log("Question loaded into database")
+  }
+  var sql = `SELECT * FROM questions`;
+  connection.query(sql, function(err, result) {
+    if (err) {
+      return console.error('*** error: ' + err.message);
+    }
+    total = result.length;
+    console.log("total", total);
+  });
+  console.log("All questions loaded into database.");
+}
+
+function onConnectedHandler(address, port) {
+  client.action(channel, "bot has connected");
+  askQuestion();
+}
+
+async function askQuestion() {
+  chooseQuestion();
+  await delay(1000);
+  sendQuestion();
+}
+
+async function chooseQuestion() {
+  // say bye if all questions in databade have been asked
+  if (askedQuestionIds.length === total) {
+    client.action(channel, "Those are all the questions, thanks for playing!");
+    question = '';
+    return;
+  }
+  // choosing question that has not yet been asked
+  var added = false;
+  while (!(added)) {
+    var i = Math.floor(Math.random() * total) + 1;
+    if (!(askedQuestionIds.includes(i))) {
+      askedQuestionIds.push(i);
+      added = true;
+    }
+  }
+  console.log("askedQuestionIds", askedQuestionIds);
+  var sql = `SELECT * FROM questions WHERE qid = ${i}`;
+  connection.query(sql, function(err, result) {
+    if (err) {
+      return console.error('*** error: ' + err.message);
+    }
+    question = result[0].question;
+    answer = result[0].answer;
+  });
+}
+
+function sendQuestion() {
+  if (!(question === '')) {
+    client.action(channel, `Question #${askedQuestionIds.length} of ${total}: ${question}`);
+  }
 }
 
 function checkAnswer(user, message) {
   if (message.toLowerCase() === answer.toLowerCase()) {
-    var name = user["display-name"] || user["username"];
-    client.action(channel, `${name} guessed the correct answer: ${answer}`);
+    var username = user["display-name"] || user["username"];
+    client.action(channel, `${username} guessed the correct answer: ${answer}`);
+    addToLeaderboard(username);
     askQuestion();
   }
 }
 
-function askQuestion() {
-  if (curr === questionSet.length) {
-    client.action(channel, "Those are all questions, thanks for playing!");
-    return;
-  }
-  question = questionSet[curr].question;
-  answer = questionSet[curr].answer;
-  curr = curr + 1;
-  client.action(channel, `Question #${curr} of ${questionSet.length}: ${question}`);
+function addToLeaderboard(username) {
+  var sql = `INSERT INTO leaderboard (user_hash, score) VALUES ('foo', 1) ON DUPLICATE KEY UPDATE score = score + 1`;
+  connection.query(sql, function(err, result) {
+    if (err) {
+      return console.error('*** error: ' + err.message);
+    }
+  });
 }
 
-// function createWebsite() {
-//   http.createServer(function (req, res) {
-//     res.writeHead(200, {'Content-Type': 'text/plain'});
-//     res.end(`${question}`);
-//   }).listen(8080);
-// }
 
-// function createHTML() {
-//   http.createServer(function(req, res){
-//     res.writeHead(200, {'Content-Type': 'text/html'});
-//     var myReadStream = fs.createReadStream(__dirname + '/index.html', 'utf8');
-//     myReadStream.pipe(res);
-//   }).listen(8080);
-// }
+
+// -------------------------
 
 function renderWebsite() {
-  app.engine('handlebars', handlebars.engine);
+  app.engine('handlebars', handlebars.engine)
   app.set('view engine', 'handlebars');
-  app.use(express.static(__dirname + '/'));
-  app.get('/', function(req, res, next) {
+  app.get('/', function (req, res) {
     res.render('index', {
       layout: 'main',
-      question: question,
+      question: question
+      // prevQ: prevQ,
+      // prevA: prevA
     });
   });
-  app.listen(8080);
-}
-
-function renderWebsiteSOCKET() {
-  app.engine('handlebars', handlebars.engine);
-  app.set('view engine', 'handlebars');
-  app.use(express.static(__dirname + '/'));
-  app.get('/', function(req, res, next) {
-    res.render('index', {
-      layout: 'main',
-      question: question,
+  http.listen(8000, () => {
+    console.log("listening on port 8000");
+    io.on('connection', function (socket) { // Notify for a new connection and pass the socket as parameter.
+      console.log('socket connected');
     });
   });
-  app.listen(8080);
-  io.on('connection', function (socket) { // Notify for a new connection and pass the socket as parameter.
-    console.log('new connection');
-
-    var incremental = 0;
-    setInterval(function () {
-        console.log('emit new value', incremental);
-
-        socket.emit('update-value', incremental); // Emit on the opened socket.
-        incremental++;
-    }, 1000);
-
-});
 }
+
+setInterval(function () {
+  io.emit('current', question); // Emit on the opened socket.
+}, 1000);
+
+setInterval(function () {
+  if (askedQuestionIds.length > 1) {
+    var sql = `SELECT question, answer FROM questions WHERE qid = ${askedQuestionIds[askedQuestionIds.length - 1]}`;
+    connection.query(sql, function(err, result) {
+      if (err) {
+        return console.error('*** error: ' + err.message);
+      }
+      var prevQ = result[0].question;
+      var prevA = result[0].answer;
+      io.emit('previous', prevQ, prevA);
+    });
+  }
+}, 5000);

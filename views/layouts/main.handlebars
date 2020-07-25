@@ -1,46 +1,30 @@
 <!DOCTYPE html>
-<html>
 
-<head>
-    title = title
+<html>
+	<head>
     <meta charset="utf-8">
     <title>IBM Twitch Bot</title>
-    <!-- <style>
-            IBM RGB : 75 107 175 
-            h2{
+		<script src="/socket.io/socket.io.js"></script>
+		<script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
+		<script>
+			var socket = io('http://localhost:8000'); // Connect the socket on the port defined before.
+			socket.on('current', function (question) { // When a 'current' event is received, execute the following code.
+				console.log('received new question', question);
+				$('.current').text('current question: ' + question);
+			});
+			socket.on('previous', function (prevQ, prevA) { 
+				console.log('received previous question and answer', prevQ, prevA);
+				$('.previous').text('previous question: ' + prevQ + ' ' + prevA);
+			});
+		</script>
+	</head>
+  
+	<body>
+    <h1>hello ibm quiz time</h1>
+		<h2>woot woot</h2>
 
-            }
-        </style> -->
-        <script>
-            setTimeout(function(){
-                 // location.reload();
-                 $.get("/api", function(data){
-                     somestuff;
-                     $(#questions).text(data.question)
+		<h3 class='current'></h3>
 
-                 }); 
-            }, 1000);
-            
-        </script>
-        
-    </head>
-    <body>
-        <h1>Question <p class="question">{{question}}</p></h1>
-        <h3> ...The question</h3><br>
-        <h2>Leader Board</h2>
-
-        <pre id="incremental"></pre>
-
-        <script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
-        <script>
-            var socket = io('http://localhost:8080'); // Connect the socket on the port defined before.
-
-            socket.on('update-value', function (value) { // When a 'update-value' event is received, execute the following code.
-                console.log('received new value', value);
-
-                $('#incremental').html(value);
-            });
-        </script>
-
-    </body>
+		<h3 class='previous'></h3>
+  </body>
 </html>
