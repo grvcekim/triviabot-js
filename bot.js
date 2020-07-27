@@ -5,6 +5,7 @@ const createCsvParser = require('csv-parser');
 const createCsvWriter = require('csv-writer').createObjectCsvWriter;
 const mysql = require('mysql');
 const fs = require('fs');
+var express = require('express');
 var handlebars = require('express-handlebars').create({ defaultLayout: 'main' });
 var app = require('express')();
 var http = require('http').createServer(app);
@@ -125,6 +126,7 @@ function askQuestion() {
 function renderWebsite() {
   app.engine('handlebars', handlebars.engine)
   app.set('view engine', 'handlebars');
+  app.use(express.static(__dirname + '/static'));
   app.get('/', function (req, res, next) {
     res.render('index', {
       layout: 'main',
