@@ -1,0 +1,32 @@
+body {
+    background: #001141;
+}
+.IBM-Dev-Background-Box{
+    position: absolute;
+    width: 1920px;
+    height: 151px;
+    background: #000000;
+}
+
+.IBM-Dev-Text{
+    position: absolute;
+    width: 1887px;
+    height: 176px;
+
+    font-family: Roboto;
+    font-style: normal;
+    font-weight: bold;
+    font-size: 96px;
+    line-height: 112px;
+
+    color: #CDCDCD;
+}
+
+.Question-Box{
+    position: absolute;
+    width: 702px;
+    height: 144px;
+
+    background: #E5E5E5;
+}
+

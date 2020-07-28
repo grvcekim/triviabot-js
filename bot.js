@@ -2,6 +2,7 @@ require('dotenv').config();
 const createCsvParser = require('csv-parser');
 const fs = require('fs');
 var handlebars = require('express-handlebars').create({ defaultLayout: 'main' });
+var express = require('express');
 var app = require('express')();
 const http = require('http').createServer(app);
 var io = require('socket.io')(http);
@@ -93,9 +94,9 @@ function initializeDatabase() {
   ); \
   DROP TABLE IF EXISTS `leaderboard`; \
   CREATE TABLE `leaderboard` ( \
-    `user_hash` varchar(120) NOT NULL, \
+    `user` varchar(120) NOT NULL, \
     `score` tinyint(4) NOT NULL, \
-    PRIMARY KEY (`user_hash`) \
+    PRIMARY KEY (`user`) \
   );";
   connection.query(sql, function(err) {
     if (err) {
@@ -196,7 +197,7 @@ function checkAnswer(user, message) {
 }
 
 function addToLeaderboard(username) {
-  var sql = `INSERT INTO leaderboard (user_hash, score) VALUES ('foo', 1) ON DUPLICATE KEY UPDATE score = score + 1`;
+  var sql = `INSERT INTO leaderboard (user, score) VALUES ('${username}', 1) ON DUPLICATE KEY UPDATE score = score + 1`;
   connection.query(sql, function(err, result) {
     if (err) {
       return console.error('*** error: ' + err.message);
@@ -211,6 +212,7 @@ function addToLeaderboard(username) {
 function renderWebsite() {
   app.engine('handlebars', handlebars.engine)
   app.set('view engine', 'handlebars');
+  app.use(express.static(__dirname + '/static'));
   app.get('/', function (req, res) {
     res.render('index', {
       layout: 'main',
