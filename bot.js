@@ -1,5 +1,5 @@
 require('dotenv').config();
-const createCsvParser = require('csv-parser');
+const csv = require('csv-parser');
 const fs = require('fs');
 var handlebars = require('express-handlebars').create({ defaultLayout: 'main' });
 var express = require('express');
@@ -56,7 +56,7 @@ connection.connect(function(err) {
 async function init() {
   var questionArr = parseCsv(CSV_FILE);
   initializeDatabase();
-  await delay(1000);
+  await delay(2000);
   loadDatabase(questionArr);
   await delay(1000);
   client.connect();
@@ -109,7 +109,7 @@ function initializeDatabase() {
 function parseCsv(CSV_FILE) {
   var questionArr = [];
   fs.createReadStream(CSV_FILE)
-    .pipe(createCsvParser())
+    .pipe(csv({ separator: ':' }))
     .on("data", (row) => {
       console.log(row);
       questionArr.push(row); // appends row to questionArr array
@@ -125,7 +125,7 @@ function loadDatabase(questionArr) {
   for (let pair of questionArr) {
     var q = pair.question;
     var a = pair.answer;
-    var sql = `INSERT INTO questions (question, answer) VALUES ('${q}', '${a}')`;
+    var sql = `INSERT INTO questions (question, answer) VALUES ("${q}", '${a}')`;
     connection.query(sql, function(err) {
       if (err) {
         return console.error('*** error: ' + err.message);
@@ -184,6 +184,7 @@ async function chooseQuestion() {
 function sendQuestion() {
   if (!(question === '')) {
     client.action(channel, `Question #${askedQuestionIds.length} of ${total}: ${question}`);
+    io.emit('current', question);
   }
 }
 
@@ -203,6 +204,15 @@ function addToLeaderboard(username) {
       return console.error('*** error: ' + err.message);
     }
   });
+  connection.query("SELECT * FROM leaderboard", function(err, result) {
+    if (err) {
+      return console.error('*** error: ' + err.message);
+    }
+    console.log(result);
+    io.emit('leaderboard', result);
+  });
+  
+  // io.emit('leaderboard', [{user: 'zarif', score: 4}, {user: 'mad', score: 3}, {user: 'grace', score: 2}]);
 }
 
 
@@ -217,32 +227,30 @@ function renderWebsite() {
     res.render('index', {
       layout: 'main',
       question: question
-      // prevQ: prevQ,
-      // prevA: prevA
     });
   });
   http.listen(8000, () => {
     console.log("listening on port 8000");
     io.on('connection', function (socket) { // Notify for a new connection and pass the socket as parameter.
-      console.log('socket connected');
+      // console.log('socket connected');
     });
   });
 }
 
-setInterval(function () {
-  io.emit('current', question); // Emit on the opened socket.
-}, 1000);
+// setInterval(function () {
+//   io.emit('current', question); // Emit on the opened socket.
+// }, 1000);
 
-setInterval(function () {
-  if (askedQuestionIds.length > 1) {
-    var sql = `SELECT question, answer FROM questions WHERE qid = ${askedQuestionIds[askedQuestionIds.length - 1]}`;
-    connection.query(sql, function(err, result) {
-      if (err) {
-        return console.error('*** error: ' + err.message);
-      }
-      var prevQ = result[0].question;
-      var prevA = result[0].answer;
-      io.emit('previous', prevQ, prevA);
-    });
-  }
-}, 5000);
+// setInterval(function () {
+//   if (askedQuestionIds.length > 1) {
+//     var sql = `SELECT question, answer FROM questions WHERE qid = ${askedQuestionIds[askedQuestionIds.length - 1]}`;
+//     connection.query(sql, function(err, result) {
+//       if (err) {
+//         return console.error('*** error: ' + err.message);
+//       }
+//       var prevQ = result[0].question;
+//       var prevA = result[0].answer;
+//       io.emit('previous', prevQ, prevA);
+//     });
+//   }
+// }, 5000);

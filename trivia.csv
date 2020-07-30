@@ -1,4 +1,14 @@
-question,answer
-Do you like Matthew Gray Gubler?,Yes
-What is my favorite color?,Yellow
-Where are you interning?,IBM
+question:answer
+Do you like Matthew Gray Gubler?:Yes
+What is my favorite color?:Yellow
+Where are you interning?:IBM
+What structure has a group of community-elected developers from a project’s contributor base make technical decisions about the project or projects’ future?:Open governance
+Now in its third year, this IBM initiative is the largest technical challenge of its kind. The challenge inspires developers to solve pressing global problems with sustainable software solutions. What is the challenge's name?:Call for Code
+This open source project is dedicated to making deployments of machine learning (ML) workflows on Kubernetes simple, portable and scalable.:Kubeflow
+In 2011, this IBM system defeated Jeopardy! champion, Ken Jennings.:Watson
+Red Hat (blank) is an open source container application platform based on the Kubernetes container orchestrator for enterprise app development.:OpenShift
+What is an open source software development kit (SDK) for working with OpenQASM and the IBM Q quantum processors?:Qiskit
+(Blank) is an open-source system for automating deployment, scaling, and management of containerized applications. a. Istio; b. Node.js; c. Kubernetes; d. Kubeflow:Kubernetes
+This type of computing is a distributed computing framework that brings enterprise applications closer to data sources such as IoT devices or local edge servers.:Edge
+Known as the largest and most pervasive open source software project in history.:Linux
+This kind of cloud is a platform for applications and infrastructure built on two or more components from public cloud, private cloud and on-premises IT.:Hybrid
