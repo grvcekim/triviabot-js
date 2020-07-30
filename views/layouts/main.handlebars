@@ -1,9 +1,10 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 
-<html>
+<html lang='en'>
 	<head>
     <meta charset="utf-8">
     <title>IBM Twitch Bot</title>
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
 		<link rel="stylesheet" type="text/css" href="/style.css"/>
 		<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300&display=swap" rel="stylesheet">
 		<script src="/socket.io/socket.io.js"></script>
@@ -11,27 +12,37 @@
 		<script>
 			var socket = io('http://localhost:8000'); // Connect the socket on the port defined before.
 			
-			socket.on('current', function (question) { // When a 'current' event is received, execute the following code.
+			socket.on('current', function(question) { // When a 'current' event is received, execute the following code.
 				console.log('received current question:', question);
 				$('.current').text('current question: ' + question);
 			});
 
-			socket.on('previous', function (prevQ, prevA) { 
-				console.log('received previous question:', prevQ, prevA);
-				$('.previous').text('previous question: ' + prevQ + ' ' + prevA);
+			
+			socket.on('previous', function(questions) { 
+				console.log('received updated previous questions',);
+				var table = $('#previous');
+				table.empty();
+				questions.forEach((question) => {
+					var tr = $('<tr>');
+					2 cols
+					tr.append('<td>' + question.question);
+					tr.append('<td><b>' + question.answer + '</b></td>');
+					console.log(tr);
+					table.append(tr);
+				});
 			});
 
-			socket.on('leaderboard', function (leaderboard) {
+			socket.on('leaderboard', function(leaderboard) {
 				console.log('received updated leaderboard');
-				var temp = leaderboard;
-				console.log(temp);
-				var ul = $('<ul/>') 
-				leaderboard.forEach((i, idx) => {
-			    var li = $('<li/>').text(i.user)
-					ul.append(li)
+				var table = $('.leaderboard');
+				table.empty();
+				leaderboard.forEach((user) => {
+					var tr = $('<tr>');
+					['user', 'score'].forEach(function(attr) {
+						tr.append('<td>' + user[attr] + '</td>');
+					});
+					table.append(tr);
 				});
-				console.log(ul)
-				$('.leaderboard').html(ul);
 			});
 		</script>
 	</head>
@@ -47,84 +58,38 @@
 			<h3 class='current'></h3>
 		</div>
 
-		<h3 class='previous'></h3>
-
 		<div class='leaderboard-box'>
 			<h3>Leaderboard</h3>
-			<p class='leaderboard'></p>
-			<div class="wrapper">
-			<div class="box a">A</div>
-			<div class="box b">B</div>
-			<div class="box c">C</div>
-			<div class="box d">D</div>
-			<div class="box e">E</div>
-			<div class="box f">F</div>
-		</div>
+			
+			<table class='table table-striped'>
+				<thead>
+					<tr>
+						<th scope='col'>User</th>
+						<th scope='col'>Score</th>
+					</tr>
+				</thead>
+				<tbody class='leaderboard'></tbody>
+			</table>
+			
+			
+			{{!-- <div class="wrapper">
+				<div class="box a">A</div>
+				<div class="box b">B</div>
+				<div class="box c">C</div>
+				<div class="box d">D</div>
+				<div class="box e">E</div>
+				<div class="box f">F</div>
+			</div> --}}
 		</div>
 
 		<div class='prev-questions-box'>
 			<h3>Previous Questions</h3>
+
+			<table class='table table-striped' id='previous'>
+			</table>
 		</div>
 
 		<div class='promotions-box'></div>
-		{{!-- <div class='container'></div>
-		<div class='item-a'></div> --}}
-
-		
-  {{!-- 
-  .center
-	  .top3
-		  .two.item
-			  .pos 2
-			  .pic style="background-image: url('https://randomuser.me/api/portraits/men/44.jpg')"
-			  .name Edgar Soto
-			  .score 6453
-      .one.item
-        .pos 1
-        .pic style="background-image: url('https://randomuser.me/api/portraits/men/31.jpg')"
-        .name Clifford James
-        .score 6794
-      .three.item
-        .pos 3
-        .pic style="background-image: url('https://randomuser.me/api/portraits/women/91.jpg')"
-        .name Nevaeh Silva
-        .score 6034
-    .list
-      .item
-        .pos 4
-        .pic style="background-image: url('https://randomuser.me/api/portraits/men/88.jpg')"
-        .name Clayton Watson
-        .score 5980
-      .item
-        .pos 5
-        .pic style="background-image: url('https://randomuser.me/api/portraits/women/29.jpg')"
-        .name Debbie Lane
-        .score 5978
-      .item
-        .pos 6
-        .pic style="background-image: url('https://randomuser.me/api/portraits/women/85.jpg')"
-        .name Gabriella Steward
-        .score 5845
-      .item
-        .pos 7
-        .pic style="background-image: url('https://randomuser.me/api/portraits/women/39.jpg')"
-        .name Nina Perkins
-        .score 5799
-      .item
-        .pos 8
-        .pic style="background-image: url('https://randomuser.me/api/portraits/men/77.jpg')"
-        .name Dennis Henry
-        .score 5756
-      .item
-        .pos 9
-        .pic style="background-image: url('https://randomuser.me/api/portraits/women/49.jpg')"
-        .name Courtney Fuller
-        .score 5713
-      .item
-        .pos 10
-        .pic style="background-image: url('https://randomuser.me/api/portraits/women/30.jpg')"
-        .name Joan Wood
-        .score 5674
-	 --}}
+	
 	</body>
 </html>

@@ -31,6 +31,7 @@ client.on("chat", onChatHandler);
 
 var total = 0;
 var askedQuestionIds = [];
+var askedQuestions = [];
 var question = '';
 var answer = '';
 
@@ -44,6 +45,7 @@ var connection = mysql.createConnection({
   multipleStatements: true
 });
 
+// connect to database, start front-end, ready bot and database
 connection.connect(function(err) {
   if (err) {
     return console.error('*** error: ' + err.message);
@@ -53,6 +55,7 @@ connection.connect(function(err) {
   init(); // parce csv, prep database, connect to twitch
 });
 
+// prepare the bot and database
 async function init() {
   var questionArr = parseCsv(CSV_FILE);
   initializeDatabase();
@@ -68,10 +71,13 @@ function delay(ms){
   });
 }
 
+// ask question once bot has connected to twitch client
 function onConnectedHandler(address, port) {
   client.action(channel, "bot has connected");
+  askQuestion();
 }
 
+// check every message against current answer
 function onChatHandler(channel, user, message, self) {
   if (self) {
     return;
@@ -79,6 +85,7 @@ function onChatHandler(channel, user, message, self) {
   checkAnswer(user, message);
 }
 
+// create triviabot database, questions table, leaderboard table
 function initializeDatabase() {
   var sql = "DROP DATABASE IF EXISTS `triviabot`; \
   CREATE DATABASE `triviabot`; \
@@ -106,6 +113,7 @@ function initializeDatabase() {
   console.log("Database initialized.");
 }
 
+// parse csv for question and answer pairs separated by : and store them in questionArr
 function parseCsv(CSV_FILE) {
   var questionArr = [];
   fs.createReadStream(CSV_FILE)
@@ -120,6 +128,7 @@ function parseCsv(CSV_FILE) {
   return questionArr;
 }
 
+// load database with questions parsed from csv file
 function loadDatabase(questionArr) {
   console.log(questionArr);
   for (let pair of questionArr) {
@@ -132,6 +141,7 @@ function loadDatabase(questionArr) {
       }
     });
   }
+  // update total variable with total number of questions loaded into database
   var sql = `SELECT * FROM questions`;
   connection.query(sql, function(err, result) {
     if (err) {
@@ -143,17 +153,14 @@ function loadDatabase(questionArr) {
   console.log("All questions loaded into database.");
 }
 
-function onConnectedHandler(address, port) {
-  client.action(channel, "bot has connected");
-  askQuestion();
-}
-
+// choose and ask new question
 async function askQuestion() {
   chooseQuestion();
   await delay(1000);
   sendQuestion();
 }
 
+// choose question
 async function chooseQuestion() {
   // say bye if all questions in databade have been asked
   if (askedQuestionIds.length === total) {
@@ -161,26 +168,31 @@ async function chooseQuestion() {
     question = '';
     return;
   }
-  // choosing question that has not yet been asked
+  // choose question that has not yet been asked and add to askedQuestionIds
   var added = false;
   while (!(added)) {
     var i = Math.floor(Math.random() * total) + 1;
     if (!(askedQuestionIds.includes(i))) {
-      askedQuestionIds.push(i);
+      askedQuestionIds.unshift(i);
       added = true;
     }
   }
+  // query chosen question from database
   console.log("askedQuestionIds", askedQuestionIds);
   var sql = `SELECT * FROM questions WHERE qid = ${i}`;
   connection.query(sql, function(err, result) {
     if (err) {
       return console.error('*** error: ' + err.message);
     }
+    // insert question into list of askedQuestions
+    askedQuestions.unshift(result[0]);
+    // update current question, answer variables
     question = result[0].question;
     answer = result[0].answer;
   });
 }
 
+// send current question to twitch chat and front-end
 function sendQuestion() {
   if (!(question === '')) {
     client.action(channel, `Question #${askedQuestionIds.length} of ${total}: ${question}`);
@@ -188,15 +200,21 @@ function sendQuestion() {
   }
 }
 
+// check message with current answer
+// if answer is correct, update user's score in leaderboard (addToLeaderboard), update leaderboard in front-end (updateLeaderboard),
+// update asked questions in front-end (updatePreviousQestion), choose new question (askQuestion)
 function checkAnswer(user, message) {
   if (message.toLowerCase() === answer.toLowerCase()) {
     var username = user["display-name"] || user["username"];
     client.action(channel, `${username} guessed the correct answer: ${answer}`);
     addToLeaderboard(username);
+    updateLeaderboard();
+    updatePreviousQuestions();
     askQuestion();
   }
 }
 
+// increment user's score or adds user to leaderboard database when question is correctly answered
 function addToLeaderboard(username) {
   var sql = `INSERT INTO leaderboard (user, score) VALUES ('${username}', 1) ON DUPLICATE KEY UPDATE score = score + 1`;
   connection.query(sql, function(err, result) {
@@ -204,53 +222,34 @@ function addToLeaderboard(username) {
       return console.error('*** error: ' + err.message);
     }
   });
-  connection.query("SELECT * FROM leaderboard", function(err, result) {
+}
+
+// send updated leaderboard to front-end
+function updateLeaderboard() {
+  connection.query("SELECT * FROM leaderboard ORDER BY score DESC", function(err, result) {
     if (err) {
       return console.error('*** error: ' + err.message);
     }
-    console.log(result);
     io.emit('leaderboard', result);
   });
-  
-  // io.emit('leaderboard', [{user: 'zarif', score: 4}, {user: 'mad', score: 3}, {user: 'grace', score: 2}]);
 }
 
+// send updated previous questions to front-end
+function updatePreviousQuestions() {
+  io.emit('previous', askedQuestions)
+}
 
-
-// -------------------------
-
+// connect to front-end
 function renderWebsite() {
-  app.engine('handlebars', handlebars.engine)
+  app.engine('handlebars', handlebars.engine);
   app.set('view engine', 'handlebars');
   app.use(express.static(__dirname + '/static'));
-  app.get('/', function (req, res) {
+  app.get('/', function(req, res) {
     res.render('index', {
       layout: 'main',
-      question: question
     });
   });
   http.listen(8000, () => {
     console.log("listening on port 8000");
-    io.on('connection', function (socket) { // Notify for a new connection and pass the socket as parameter.
-      // console.log('socket connected');
-    });
   });
 }
-
-// setInterval(function () {
-//   io.emit('current', question); // Emit on the opened socket.
-// }, 1000);
-
-// setInterval(function () {
-//   if (askedQuestionIds.length > 1) {
-//     var sql = `SELECT question, answer FROM questions WHERE qid = ${askedQuestionIds[askedQuestionIds.length - 1]}`;
-//     connection.query(sql, function(err, result) {
-//       if (err) {
-//         return console.error('*** error: ' + err.message);
-//       }
-//       var prevQ = result[0].question;
-//       var prevA = result[0].answer;
-//       io.emit('previous', prevQ, prevA);
-//     });
-//   }
-// }, 5000);
