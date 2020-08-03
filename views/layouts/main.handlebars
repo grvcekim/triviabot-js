@@ -7,6 +7,7 @@
 		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
 		<link rel="stylesheet" type="text/css" href="/style.css"/>
 		<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300&display=swap" rel="stylesheet">
+		{{!-- <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@200;500&display=swap" rel="stylesheet"> --}}
 		<script src="/socket.io/socket.io.js"></script>
 		<script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
 		<script>
@@ -14,7 +15,7 @@
 			
 			socket.on('current', function(question) { // When a 'current' event is received, execute the following code.
 				console.log('received current question:', question);
-				$('.current').text('current question: ' + question);
+				$('.current').html("<span class='bold'>Current question:</span> " + question);
 			});
 
 			
@@ -24,8 +25,8 @@
 				table.empty();
 				questions.forEach((question) => {
 					var tr = $('<tr>');
-					tr.append('<td>' + question.question);
-					tr.append('<td><b>' + question.answer + '</b></td>');
+					tr.append('<td>' + question.question + ' ' + "<span class='semibold'>" + question.answer + "</span>");
+					//tr.append("<td><span class=semibold" + question.answer + '</span></td>');
 					console.log(tr);
 					table.append(tr);
 				});
@@ -69,16 +70,6 @@
 				</thead>
 				<tbody class='leaderboard'></tbody>
 			</table>
-			
-			
-			{{!-- <div class="wrapper">
-				<div class="box a">A</div>
-				<div class="box b">B</div>
-				<div class="box c">C</div>
-				<div class="box d">D</div>
-				<div class="box e">E</div>
-				<div class="box f">F</div>
-			</div> --}}
 		</div>
 
 		<div class='prev-questions-box'>

@@ -253,3 +253,9 @@ function renderWebsite() {
     console.log("listening on port 8000");
   });
 }
+
+io.on('connection', function(socket) {
+  io.emit('previous', askedQuestions)
+  updateLeaderboard()
+  io.emit('current', question);
+});
