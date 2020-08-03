@@ -1,7 +1,4 @@
 question:answer
-Do you like Matthew Gray Gubler?:Yes
-What is my favorite color?:Yellow
-Where are you interning?:IBM
 What structure has a group of community-elected developers from a project’s contributor base make technical decisions about the project or projects’ future?:Open governance
 Now in its third year, this IBM initiative is the largest technical challenge of its kind. The challenge inspires developers to solve pressing global problems with sustainable software solutions. What is the challenge's name?:Call for Code
 This open source project is dedicated to making deployments of machine learning (ML) workflows on Kubernetes simple, portable and scalable.:Kubeflow
@@ -16,16 +13,14 @@ What port does mysql listen on?:3306
 What TCP port is used for unencrypted web traffic?:80
 What TCP port is used for encrypted web traffic?:443
 What TCP port is used for Secure Shell (SSH)?:22
-This protocol for internet communication sits on top of IP, is connection oriented, and has durability built in:TCP
-This protocol for internet communication sits on top of IP, is connectionless, and features no retry logic:UDP
-This protocol for internet communication maps IP addresses to names of servers and sites:DNS
-This is the smallest deployable unit in kubernetes:pod
-This command is used to control and configure kubernetes:kubectl
-This command is used to control and configure openshift:oc
-This command is used to create filesystems in a unix/linux environment:mkfs
-This command is used to mount filesystems in a unix/linux environment:mount
-This command is used to test network connectivity and latency to remote hosts:ping
-This command is used to compress and bundle many files into a single file:tar
-This command is used to copy files from one server or workstation to another:scp
-
-
+This protocol for internet communication sits on top of IP, is connection oriented, and has durability built in.:TCP
+This protocol for internet communication sits on top of IP, is connectionless, and features no retry logic.:UDP
+This protocol for internet communication maps IP addresses to names of servers and sites.:DNS
+This is the smallest deployable unit in kubernetes.:pod
+This command is used to control and configure kubernetes.:kubectl
+This command is used to control and configure openshift.:oc
+This command is used to create filesystems in a unix/linux environment.:mkfs
+This command is used to mount filesystems in a unix/linux environment.:mount
+This command is used to test network connectivity and latency to remote hosts.:ping
+This command is used to compress and bundle many files into a single file.:tar
+This command is used to copy files from one server or workstation to another.:scp

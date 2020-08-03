@@ -1,0 +1,82 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: triviabot
+  labels:
+    app: triviabot
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: triviabot
+  template:
+    metadata:
+      labels:
+        app: triviabot
+    spec:
+      containers:
+      - name: triviabot
+        image: grvcekim/triviabot:1.1
+        ports:
+          - containerPort: 8000
+        imagePullPolicy: Always
+        env:
+        - name: TWITCH_USER
+          valueFrom:
+            secretKeyRef:
+              name: triviabot-secret
+              key: TWITCH_USER
+        - name: TWITCH_PASS
+          valueFrom:
+            secretKeyRef:
+              name: triviabot-secret
+              key: TWITCH_PASS
+        - name: CHANNEL
+          valueFrom:
+            secretKeyRef:
+              name: triviabot-secret
+              key: CHANNEL
+        - name: DB_HOST
+          valueFrom:
+            secretKeyRef:
+              name: triviabot-secret
+              key: DB_HOST
+        - name: DB_USER
+          valueFrom:
+            secretKeyRef:
+              name: triviabot-secret
+              key: DB_USER
+        - name: DB_PASS
+          valueFrom:
+            secretKeyRef:
+              name: triviabot-secret
+              key: DB_PASS
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: triviabot
+  labels:
+    app: triviabot
+spec:
+  ports:
+  - name: http
+    port: 8000
+    protocol: TCP
+    targetPort: 8000
+  selector:
+    app: triviabot
+---
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: triviabot-ingress
+spec:
+  rules:
+  - host: bee-travels-442dbba0442be6c8c50f31ed96b00601-0000.sjc04.containers.appdomain.cloud
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: triviabot
+          servicePort: 8000

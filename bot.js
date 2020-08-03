@@ -38,7 +38,7 @@ var answer = '';
 const mysql = require('mysql');
 // database connection config
 var connection = mysql.createConnection({
-  host     : process.env.HOST,
+  host     : process.env.DB_HOST,
   user     : process.env.DB_USER,
   password : process.env.DB_PASS,
   database : 'triviabot',
@@ -82,6 +82,9 @@ function onChatHandler(channel, user, message, self) {
   if (self) {
     return;
   }
+  // if (message === '!stop') {
+  //   process.exit();
+  // }
   checkAnswer(user, message);
 }
 
@@ -255,7 +258,11 @@ function renderWebsite() {
 }
 
 io.on('connection', function(socket) {
-  io.emit('previous', askedQuestions)
-  updateLeaderboard()
+  if (askedQuestions.length > 0 && askedQuestions[0].question === question) {
+    io.emit('previous', askedQuestions.slice(1));
+  } else {
+    io.emit('previous', askedQuestions);
+  }
+  updateLeaderboard('connect');
   io.emit('current', question);
 });
