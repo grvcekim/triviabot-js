@@ -1,5 +1,6 @@
 * {
   font-family: 'IBM Plex Sans', sans-serif;
+  font-weight: 300;
   font-style: normal;
   text-align: center;
   color: black;
@@ -14,6 +15,10 @@ img {
   top: 0px;
   height: 150px;
   z-index: -1;
+}
+
+div {
+  background: #f2f4f8;
 }
 
 h3 {
@@ -32,16 +37,11 @@ h3 {
   font-weight: bold;
   color: white;
   font-size: 72px;
+  font-family: 'IBM Plex Mono', monospace;
 }
 
 .bold {
-  font-weight: 400;
-  font-family: 'IBM Plex Sans Bold', sans-serif;
-}
-
-.semibold {
-  font-weight: 500;
-  font-family: 'IBM Plex Sans Bold', sans-serif;
+  font-weight: 600;
 }
 
 .leaderboard-box {
@@ -50,7 +50,6 @@ h3 {
   bottom: 5%;
   width: 20%;
   height: 70%;
-  background-color: white;
 }
 
 .prev-questions-box {
@@ -59,7 +58,6 @@ h3 {
   bottom: 5%;
   width: 20%;
   height: 70%;
-  background-color: white;
   overflow: hidden;
 }
 
@@ -67,9 +65,13 @@ h3 {
   position: absolute;
   top: 25%;
   left: 3%;
-  width: 45%; /*702px*/
-  height: 20%; /*144px*/
-  background: #E5E5E5;
+  width: 45%; 
+  height: 20%; 
+  font-size: 25px;
+}
+
+.curr-question-box p {
+  margin: 10px;
 }
 
 .promotions-box {
@@ -78,5 +80,4 @@ h3 {
   left: 3%;
   width: 45%;
   height: 45%;
-  background: #E5E5E5;
 }

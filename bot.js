@@ -42,6 +42,7 @@ var connection = mysql.createConnection({
   user     : process.env.DB_USER,
   password : process.env.DB_PASS,
   database : 'triviabot',
+  port : process.env.DB_PORT,
   multipleStatements: true
 });
 
@@ -61,7 +62,7 @@ async function init() {
   initializeDatabase();
   await delay(2000);
   loadDatabase(questionArr);
-  await delay(1000);
+  await delay(5000);
   client.connect();
 }
 

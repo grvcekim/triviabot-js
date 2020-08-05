@@ -6,16 +6,16 @@
     <title>IBM Twitch Bot</title>
 		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
 		<link rel="stylesheet" type="text/css" href="/style.css"/>
-		<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300&display=swap" rel="stylesheet">
-		{{!-- <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@200;500&display=swap" rel="stylesheet"> --}}
+		<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono&family=IBM+Plex+Sans:wght@300;500&display=swap" rel="stylesheet">		
 		<script src="/socket.io/socket.io.js"></script>
 		<script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
 		<script>
-			var socket = io('http://localhost:8000'); // Connect the socket on the port defined before.
+			var socket = io(); // Connect the socket on the port defined before.
 			
 			socket.on('current', function(question) { // When a 'current' event is received, execute the following code.
 				console.log('received current question:', question);
 				$('.current').html("<span class='bold'>Current question:</span> " + question);
+				//$('.current').html("Current question: " + question);
 			});
 
 			
@@ -25,7 +25,7 @@
 				table.empty();
 				questions.forEach((question) => {
 					var tr = $('<tr>');
-					tr.append('<td>' + question.question + ' ' + "<span class='semibold'>" + question.answer + "</span>");
+					tr.append('<td>' + question.question + ' ' + "<span class='bold'>" + question.answer + "</span>");
 					//tr.append("<td><span class=semibold" + question.answer + '</span></td>');
 					console.log(tr);
 					table.append(tr);
@@ -48,14 +48,14 @@
 	</head>
   
 	<body>
-    <img src="/images/bee.png" alt="IBM Bee">
+    	{{!-- <img src="/images/bee.png" alt="IBM Bee"> --}}
     
 		<div class='top-banner'>
 			IBM Developer - Quiz Break!
 		</div>
 
 		<div class='curr-question-box'>
-			<h3 class='current'></h3>
+			<p class='current'></p>
 		</div>
 
 		<div class='leaderboard-box'>

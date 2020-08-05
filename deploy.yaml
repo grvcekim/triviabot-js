@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: triviabot
-        image: grvcekim/triviabot:1.1
+        image: grvcekim/triviabot:1.3
         ports:
           - containerPort: 8000
         imagePullPolicy: Always
@@ -51,6 +51,11 @@ spec:
             secretKeyRef:
               name: triviabot-secret
               key: DB_PASS
+        - name: DB_PORT
+          valueFrom:
+            secretKeyRef:
+              name: triviabot-secret
+              key: DB_PORT
 ---
 apiVersion: v1
 kind: Service
