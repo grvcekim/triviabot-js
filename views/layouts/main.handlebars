@@ -16,15 +16,6 @@
 				console.log('received current question:', question);
 				$('.current').html("<span class='bold'>Current question:</span> " + question);
 			});
-
-			//socket.on('timer', function(data){
-				//$('#counter').html(data.countdown);
-			//});
-
-			//$('#reset').click(function(){
-				//socket.emit('reset');
-			//});
-
 			
 			socket.on('previous', function(questions) { 
 				console.log('received updated previous questions',);
@@ -53,9 +44,7 @@
 		</script>
 	</head>
   
-	<body>
-    	{{!-- <img src="/images/bee.png" alt="IBM Bee"> --}}
-    
+	<body>    
 		<div class='top-banner'>
 			IBM Developer - Quiz Break!
 		</div>
@@ -63,9 +52,6 @@
 		<div class='curr-question-box'>
 			<p class='current'></p>
 		</div>
-		{{!-- Counter and Reset down here --}}
-		{{!-- <div id = "counter"></div> --}}  
-		{{!-- <button id = "reset">Reset!</button>git  --}}
 
 		<div class='leaderboard-box'>
 			<h3>Leaderboard</h3>

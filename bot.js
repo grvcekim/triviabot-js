@@ -6,11 +6,9 @@ var express = require('express');
 var app = require('express')();
 const http = require('http').createServer(app);
 var io = require('socket.io')(http);
-var countdown = 60000;
 
 // const SQL_FILE = 'db.sql';
 const CSV_FILE = 'trivia.csv';
-// const CSV_FILE = 'foo.csv';
 
 const tmi = require('tmi.js');
 // twitch connection config
@@ -67,13 +65,6 @@ async function init() {
   await delay(5000);
   client.connect();
 }
-
-
-// setInterval(function(){
-//   countdown--;
-//   io.sockets.emit('timer', {countdown: countdown});
-// }, 1000);
-
 
 function delay(ms){
   return new Promise((resolve) => {
@@ -172,7 +163,7 @@ async function askQuestion() {
 
 // choose question
 async function chooseQuestion() {
-  // empty list of askedQuestionIds
+  // empty list of askedQuestionIds when all questions have been asked to restart
   if (askedQuestionIds.length === total) {
     askedQuestionIds = [];
   }
@@ -273,7 +264,6 @@ io.on('connection', function(socket) {
     io.emit('previous', askedQuestions);
   }
   countdown = 60000;
-  // io.emit('timer', {countdown: countdown});
   updateLeaderboard('connect');
   io.emit('current', question);
 });
