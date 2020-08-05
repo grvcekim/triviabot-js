@@ -24,3 +24,4 @@ This command is used to mount filesystems in a unix/linux environment.:mount
 This command is used to test network connectivity and latency to remote hosts.:ping
 This command is used to compress and bundle many files into a single file.:tar
 This command is used to copy files from one server or workstation to another.:scp
+What is the smallest unit of deployement in Kubernetes?:pod
