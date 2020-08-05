@@ -15,8 +15,15 @@
 			socket.on('current', function(question) { // When a 'current' event is received, execute the following code.
 				console.log('received current question:', question);
 				$('.current').html("<span class='bold'>Current question:</span> " + question);
-				//$('.current').html("Current question: " + question);
 			});
+
+			//socket.on('timer', function(data){
+				//$('#counter').html(data.countdown);
+			//});
+
+			//$('#reset').click(function(){
+				//socket.emit('reset');
+			//});
 
 			
 			socket.on('previous', function(questions) { 
@@ -26,7 +33,6 @@
 				questions.forEach((question) => {
 					var tr = $('<tr>');
 					tr.append('<td>' + question.question + ' ' + "<span class='bold'>" + question.answer + "</span>");
-					//tr.append("<td><span class=semibold" + question.answer + '</span></td>');
 					console.log(tr);
 					table.append(tr);
 				});
@@ -57,6 +63,9 @@
 		<div class='curr-question-box'>
 			<p class='current'></p>
 		</div>
+		{{!-- Counter and Reset down here --}}
+		{{!-- <div id = "counter"></div> --}}  
+		{{!-- <button id = "reset">Reset!</button>git  --}}
 
 		<div class='leaderboard-box'>
 			<h3>Leaderboard</h3>

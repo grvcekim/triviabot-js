@@ -6,9 +6,11 @@ var express = require('express');
 var app = require('express')();
 const http = require('http').createServer(app);
 var io = require('socket.io')(http);
+var countdown = 60000;
 
 // const SQL_FILE = 'db.sql';
 const CSV_FILE = 'trivia.csv';
+// const CSV_FILE = 'foo.csv';
 
 const tmi = require('tmi.js');
 // twitch connection config
@@ -66,6 +68,13 @@ async function init() {
   client.connect();
 }
 
+
+// setInterval(function(){
+//   countdown--;
+//   io.sockets.emit('timer', {countdown: countdown});
+// }, 1000);
+
+
 function delay(ms){
   return new Promise((resolve) => {
     setTimeout(resolve, ms);
@@ -83,9 +92,6 @@ function onChatHandler(channel, user, message, self) {
   if (self) {
     return;
   }
-  // if (message === '!stop') {
-  //   process.exit();
-  // }
   checkAnswer(user, message);
 }
 
@@ -166,11 +172,9 @@ async function askQuestion() {
 
 // choose question
 async function chooseQuestion() {
-  // say bye if all questions in databade have been asked
+  // empty list of askedQuestionIds
   if (askedQuestionIds.length === total) {
-    client.action(channel, "Those are all the questions, thanks for playing!");
-    question = '';
-    return;
+    askedQuestionIds = [];
   }
   // choose question that has not yet been asked and add to askedQuestionIds
   var added = false;
@@ -188,18 +192,22 @@ async function chooseQuestion() {
     if (err) {
       return console.error('*** error: ' + err.message);
     }
-    // insert question into list of askedQuestions
+    // insert question into beginning of list of askedQuestions
     askedQuestions.unshift(result[0]);
     // update current question, answer variables
     question = result[0].question;
     answer = result[0].answer;
   });
+  // keep askedQuestions from getting too big
+  if (askedQuestions.legnth > 10) {
+    askedQuestions.pop();
+  }
 }
 
 // send current question to twitch chat and front-end
 function sendQuestion() {
   if (!(question === '')) {
-    client.action(channel, `Question #${askedQuestionIds.length} of ${total}: ${question}`);
+    client.action(channel, `Question: ${question}`);
     io.emit('current', question);
   }
 }
@@ -264,6 +272,8 @@ io.on('connection', function(socket) {
   } else {
     io.emit('previous', askedQuestions);
   }
+  countdown = 60000;
+  // io.emit('timer', {countdown: countdown});
   updateLeaderboard('connect');
   io.emit('current', question);
 });
