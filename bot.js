@@ -36,6 +36,7 @@ var question = '';
 var answer = '';
 
 const mysql = require('mysql');
+const { send } = require('process');
 // database connection config
 var connection = mysql.createConnection({
   host     : process.env.DB_HOST,
@@ -82,6 +83,9 @@ function onConnectedHandler(address, port) {
 function onChatHandler(channel, user, message, self) {
   if (self) {
     return;
+  }
+  if (message === '!question' || message === '!q') {
+    sendQuestion();
   }
   checkAnswer(user, message);
 }
@@ -263,7 +267,4 @@ io.on('connection', function(socket) {
   } else {
     io.emit('previous', askedQuestions);
   }
-  countdown = 60000;
-  updateLeaderboard('connect');
-  io.emit('current', question);
 });
