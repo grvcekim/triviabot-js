@@ -50,6 +50,7 @@ h3 {
   bottom: 5%;
   width: 20%;
   height: 70%;
+  overflow: hidden;
 }
 
 .prev-questions-box {

@@ -63,7 +63,7 @@ async function init() {
   initializeDatabase();
   await delay(2000);
   loadDatabase(questionArr);
-  await delay(5000);
+  await delay(2000);
   client.connect();
 }
 
@@ -87,13 +87,18 @@ function onChatHandler(channel, user, message, self) {
   if (message === '!question' || message === '!q') {
     sendQuestion();
   }
+  if (message === '!help') {
+    client.say(channel, `Enter !question or !q to get the current question. Enter !score to get your score.`);
+  }
+  if (message === '!score') {
+    sendScore(user);
+  }
   checkAnswer(user, message);
 }
 
 // create triviabot database, questions table, leaderboard table
 function initializeDatabase() {
-  var sql = "DROP DATABASE IF EXISTS `triviabot`; \
-  CREATE DATABASE `triviabot`; \
+  var sql = "CREATE DATABASE IF NOT EXISTS `triviabot`; \
   USE `triviabot`; \
   SET NAMES utf8; \
   SET character_set_client = utf8mb4; \
@@ -104,8 +109,7 @@ function initializeDatabase() {
     `answer` varchar(100) NOT NULL, \
     PRIMARY KEY (`qid`) \
   ); \
-  DROP TABLE IF EXISTS `leaderboard`; \
-  CREATE TABLE `leaderboard` ( \
+  CREATE TABLE IF NOT EXISTS `leaderboard` ( \
     `user` varchar(120) NOT NULL, \
     `score` tinyint(4) NOT NULL, \
     PRIMARY KEY (`user`) \
@@ -139,7 +143,7 @@ function loadDatabase(questionArr) {
   for (let pair of questionArr) {
     var q = pair.question;
     var a = pair.answer;
-    var sql = `INSERT INTO questions (question, answer) VALUES ("${q}", '${a}')`;
+    var sql = `INSERT INTO questions (question, answer) VALUES ("${q}", "${a}")`;
     connection.query(sql, function(err) {
       if (err) {
         return console.error('*** error: ' + err.message);
@@ -202,9 +206,30 @@ async function chooseQuestion() {
 // send current question to twitch chat and front-end
 function sendQuestion() {
   if (!(question === '')) {
-    client.action(channel, `Question: ${question}`);
+    client.say(channel, `Question: ${question}`);
     io.emit('current', question);
   }
+}
+
+function sendScore(user) {
+  var username = user["display-name"] || user["username"];
+  var sql = `SELECT score FROM leaderboard WHERE user = "${username}"`;
+  connection.query(sql, function(err, result) {
+    if (err) {
+      return console.error('*** error: ' + err.message);
+    }
+    var score;
+    if (result.length == 0) {
+      score = 0;
+    } else {
+      score = result[0].score;
+    }
+    if (score == 1) {
+      client.say(channel, `${username} has ${score} point`);
+    } else {
+      client.say(channel, `${username} has ${score} points`);
+    }
+  });
 }
 
 // check message with current answer
@@ -213,7 +238,7 @@ function sendQuestion() {
 function checkAnswer(user, message) {
   if (message.toLowerCase() === answer.toLowerCase()) {
     var username = user["display-name"] || user["username"];
-    client.action(channel, `${username} guessed the correct answer: ${answer}`);
+    client.say(channel, `${username} guessed the correct answer: ${answer}`);
     addToLeaderboard(username);
     updateLeaderboard();
     updatePreviousQuestions();
@@ -223,7 +248,7 @@ function checkAnswer(user, message) {
 
 // increment user's score or adds user to leaderboard database when question is correctly answered
 function addToLeaderboard(username) {
-  var sql = `INSERT INTO leaderboard (user, score) VALUES ('${username}', 1) ON DUPLICATE KEY UPDATE score = score + 1`;
+  var sql = `INSERT INTO leaderboard (user, score) VALUES ("${username}", 1) ON DUPLICATE KEY UPDATE score = score + 1`;
   connection.query(sql, function(err, result) {
     if (err) {
       return console.error('*** error: ' + err.message);
@@ -267,4 +292,6 @@ io.on('connection', function(socket) {
   } else {
     io.emit('previous', askedQuestions);
   }
+  updateLeaderboard();
+  io.emit('current', question);
 });

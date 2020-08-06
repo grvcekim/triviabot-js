@@ -16,8 +16,8 @@ What TCP port is used for Secure Shell (SSH)?:22
 This protocol for internet communication sits on top of IP, is connection oriented, and has durability built in.:TCP
 This protocol for internet communication sits on top of IP, is connectionless, and features no retry logic.:UDP
 This protocol for internet communication maps IP addresses to names of servers and sites.:DNS
-This is the smallest deployable unit in kubernetes.:pod
-This command is used to control and configure kubernetes.:kubectl
+This is the smallest deployable unit in Kubernetes.:pod
+This command is used to control and configure Kubernetes.:kubectl
 This command is used to control and configure openshift.:oc
 This command is used to create filesystems in a unix/linux environment.:mkfs
 This command is used to mount filesystems in a unix/linux environment.:mount
