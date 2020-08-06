@@ -1,3 +1,3 @@
 # triviabot-js
 
-remember to echo val -n | base64 when updating secret
+remember to echo -n val | base64 when updating secret
