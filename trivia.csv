@@ -53,8 +53,12 @@ This programming language was first called LiveScript when it launched in Netsca
 This programming language developed by Graydon Hoare at Mozilla Research is focused on performance and safety:rust
 This database company owns the trademark on the name Javascript:Oracle
 This programming language has been named the "most loved programming language" in the Stack Overflow Developer Survey every year since 2016:rust
-
-
+This language was used for NeXT, and then, later, Mac OS X and iOS:objective c
+This was the primary programming language for early versions of Macintosh:pascal
+This method of control flow, considered harmful, is incompatible with structured programming:goto
+This posix system call also became known as an approach to debugging:printf
+This memory management chore can sometimes lead to performance issues:garbage collection
+The unpublishing of this popular JavaScript package caused widespread havoc and led to npm changing its unpublish policy:left-pad
 
 
 
