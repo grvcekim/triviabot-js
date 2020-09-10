@@ -32,3 +32,32 @@ Which Scottisch economist and philosopher is considered the Father of Capitalism
 Who painted The Starry Night dating from 1889 and located at the MoMA in NYC?:Vincent van Gogh
 Which influentiual black educator, intellectual and leader was the first president of the Tuskegee Institute?:Booker T. Washington
 Which black organizer born in Trinidad developed the Black Power movement?:Stokely Carmichael
+This command is replacing ifconfig as the main utility for configuring network interfaces on Linux systems:ip
+This command will show used and unused memory on a Linux system:free
+This Linux tool can interrogate the bios and dump hardware information:dmidecode
+This Linux tool will list PCI devices on the system:lspci
+This Linux tool will list USB devices on the system:lsusb
+This Linux tool will print distribution information (e.g. Ubuntu, Centos):lsb_release
+This file in /proc contains the kernel boot arguments:/proc/cmdline
+This file in /proc contains information on the physical processor:/proc/cpuinfo
+This Linux tool is the primary interface for managing the software raid:mdadm
+This Linux tool is the primary interface for managing encrypted block devices:cryptsetup
+This Linux tool is the command line frontend to libvirt, the Virtual Machine manager for Linux:virsh
+This Linux tool is used to set up firewalls, perform nat routing, and other network rules:iptables
+This Linux tool will help you find files you have lost:find
+This programming language developed by Larry Wall in 1987 makes heavy use of regular expressions:perl
+This programming language developed by Martin Odersky in 2004 runs on the JVM and supports both functional and object oreiented programming models:scala
+This programming language developed by Google around 2010 is staticly typed and makes it easy to write multithreaded programs:go
+This programming language started as a web technology but moved to the server:javascript
+This programming language was first called LiveScript when it launched in Netscape in 1995:javascript
+This programming language developed by Graydon Hoare at Mozilla Research is focused on performance and safety:rust
+This database company owns the trademark on the name Javascript:Oracle
+This programming language has been named the "most loved programming language" in the Stack Overflow Developer Survey every year since 2016:rust
+
+
+
+
+
+
+
+
