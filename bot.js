@@ -249,8 +249,8 @@ function checkAnswer(user, message) {
   }
 }
 
-// increment user's score or adds user to leaderboard database when question is correctly answered
-function clearUser(username) {
+// Set a user's score to zero
+function clearScore(username) {
   var username = user["display-name"] || user["username"];
   var sql = `DELETE FROM leaderboard WHERE user = "${username}"`;
     connection.query(sql, function(err, result) {
