@@ -61,3 +61,4 @@ This memory management chore can sometimes lead to performance issues:garbage co
 The unpublishing of this popular JavaScript package caused widespread havoc and led to npm changing its unpublish policy:left-pad
 This command line utility can pretty print JSON and inspect and select items from a JSON payload:jq
 This open source code editor is actually an electron app:vscode
+undefined:javascript
