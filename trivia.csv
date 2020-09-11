@@ -59,7 +59,8 @@ This method of control flow, considered harmful, is incompatible with structured
 This posix system call also became known as an approach to debugging:printf
 This memory management chore can sometimes lead to performance issues:garbage collection
 The unpublishing of this popular JavaScript package caused widespread havoc and led to npm changing its unpublish policy:left-pad
-
+This command line utility can pretty print JSON and inspect and select items from a JSON payload:jq
+This open source code editor is actually an electron app:vscode
 
 
 
