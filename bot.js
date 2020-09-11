@@ -93,6 +93,9 @@ function onChatHandler(channel, user, message, self) {
   if (message === '!score') {
     sendScore(user);
   }
+  if (message === '!clearscore') {
+    clearScore(user);
+  }
   checkAnswer(user, message);
 }
 
@@ -244,6 +247,17 @@ function checkAnswer(user, message) {
     updatePreviousQuestions();
     askQuestion();
   }
+}
+
+// increment user's score or adds user to leaderboard database when question is correctly answered
+function clearUser(username) {
+  var username = user["display-name"] || user["username"];
+  var sql = `DELETE FROM leaderboard WHERE user = "${username}"`;
+    connection.query(sql, function(err, result) {
+    if (err) {
+      return console.error('*** error: ' + err.message);
+    }
+  });
 }
 
 // increment user's score or adds user to leaderboard database when question is correctly answered
