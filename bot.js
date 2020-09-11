@@ -250,7 +250,7 @@ function checkAnswer(user, message) {
 }
 
 // Set a user's score to zero
-function clearScore(username) {
+function clearScore(user) {
   var username = user["display-name"] || user["username"];
   var sql = `DELETE FROM leaderboard WHERE user = "${username}"`;
     connection.query(sql, function(err, result) {
