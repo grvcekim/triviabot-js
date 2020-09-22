@@ -62,4 +62,16 @@ This memory management chore can sometimes lead to performance issues:garbage co
 The unpublishing of this popular JavaScript package caused widespread havoc and led to npm changing its unpublish policy:left-pad
 This command line utility can pretty print JSON and inspect and select items from a JSON payload:jq
 This open source code editor is actually an electron app:vscode
+In the movie 'Matrix', did Neo take the Red or the Blue pill?:Red
+Which Star Trek captain has an artificial heart?:Picard
+Which alien race did Ronald Reagan say reminded him of Congress?:Klingons
+How many people made up the fellowship in Lord of the Ring?:9
+Who is the wizard in the Fellowship of the Ring?:Gandalf
+Who is the human in the Fellowship of the Ring?:Aragorn
+What is the popular programming language which was invented 25 years ago before 2020?:Java
+Who invented the Java programming language?:Gosling
+Java compiles source code into a lower-level code format to be further compiled by its virtual machine, what is this intermediate-level code format called?:bytecode
+In computing science, what do we call a system whose components are located on different networked computers and they communicate and coordinate with each other via messaging?:distributed
+In the context of reactive systems, how many guiding principles are there in the Reactive Manifesto?:4
+In reactive programming, how is the data being expressed and processed in the form of?:streams
 undefined:javascript
