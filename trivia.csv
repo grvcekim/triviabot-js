@@ -13,6 +13,7 @@ What port does mysql listen on?:3306
 What TCP port is used for unencrypted web traffic?:80
 What TCP port is used for encrypted web traffic?:443
 What TCP port is used for Secure Shell (SSH)?:22
+What is the sidecar proxy component in Istio?:Envoy
 This protocol for internet communication sits on top of IP, is connection oriented, and has durability built in.:TCP
 This protocol for internet communication sits on top of IP, is connectionless, and features no retry logic.:UDP
 This protocol for internet communication maps IP addresses to names of servers and sites.:DNS
