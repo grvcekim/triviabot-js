@@ -74,4 +74,5 @@ Java compiles source code into a lower-level code format to be further compiled 
 In computing science, what do we call a system whose components are located on different networked computers and they communicate and coordinate with each other via messaging?:distributed
 In the context of reactive systems, how many guiding principles are there in the Reactive Manifesto?:4
 In reactive programming, how is the data being expressed and processed in the form of?:streams
+This javascript frontend library had a huge impact because it was the first one with cross-browser support:jquery
 undefined:javascript
