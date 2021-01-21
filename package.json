@@ -23,7 +23,7 @@
     "express": "^4.17.1",
     "express-handlebars": "^5.1.0",
     "mysql": "^2.18.1",
-    "socket.io": "^2.3.0",
+    "socket.io": "^2.4.0",
     "tmi.js": "^1.5.0"
   }
 }
